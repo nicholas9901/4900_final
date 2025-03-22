@@ -1,6 +1,7 @@
 #include "prototypes.h"
 #include <unistd.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #define WINDOW_NAME "Traffic Simulator"
 #define WINDOW_X    640
@@ -12,11 +13,14 @@
 #define COLOR_YELLOW 255, 255, 0
 
 SDL_Window* win;
+SDL_Renderer* renderer; //apply transformations to images
 
 /* draw_gui: Initial draw function, draws the background and intersections */
 void draw_gui(vehicle_T* vehicles, intersection_T* intersections)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
+    IMG_Init(IMG_INIT_PNG);
+
     win = SDL_CreateWindow(
         WINDOW_NAME, 
         100, 
@@ -30,10 +34,18 @@ void draw_gui(vehicle_T* vehicles, intersection_T* intersections)
         exit(1);
     }
 
+    renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
+
+    if (!renderer) {
+        printf("Failed to create renderer: %s\n", SDL_GetError());
+        exit(1);
+    }
+
     SDL_Surface* win_surface = SDL_GetWindowSurface(win);
     SDL_FillRect(win_surface, NULL, SDL_MapRGB(win_surface->format, COLOR_WHITE));
 
     draw_intersection(&intersections[0]);
+    draw_vehicle(&vehicles[0]);
     SDL_UpdateWindowSurface(win);
     sleep(3);
 }
@@ -53,7 +65,23 @@ void exit_gui()
 
 void draw_vehicle(vehicle_T* vehicle)
 {
+    if (!win) return;
 
+    SDL_Surface* win_surface = SDL_GetWindowSurface(win);
+    SDL_Texture* icon = IMG_LoadTexture(renderer, "../assets/car.png");
+    if (!icon) {
+        printf("Failed to load vehicle icon \n");
+    }
+
+    //get attributes of texture
+    int icon_w, icon_h;
+    SDL_QueryTexture(icon, NULL, NULL, &icon_w, &icon_h);
+
+    //place on road
+    SDL_Rect icon_pos = { 100, 235, icon_w, icon_h };
+    SDL_RenderCopyEx(renderer, icon, NULL, &icon_pos, 90.0, NULL, SDL_FLIP_NONE);
+
+    SDL_RenderPresent(renderer);
 }
 
 void draw_intersection(intersection_T* intersection)
@@ -61,68 +89,40 @@ void draw_intersection(intersection_T* intersection)
     if (!win) return;
 
     SDL_Surface* win_surface = SDL_GetWindowSurface(win);
-    SDL_Rect rect, north, east, south, west; //intersection and roads
-    SDL_Rect northDiv, eastDiv, southDiv, westDiv;
 
     //intersection
-    rect.w = 50;
-    rect.h = 50;
+    SDL_Rect rect = { .w = 50, .h = 50 };
     rect.x = (WINDOW_X - rect.w) / 2;
     rect.y = (WINDOW_Y - rect.h) / 2;
     SDL_FillRect(win_surface, &rect, SDL_MapRGB(win_surface->format, COLOR_GRAY));
 
     //north
-    north.w = 50;
-    north.h = 215; 
-    north.x = (WINDOW_X - rect.w) / 2;
-    north.y = 0;
+    SDL_Rect north = { (WINDOW_X - rect.w) / 2, 0, 50, 215 };
     SDL_FillRect(win_surface, &north, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    northDiv.w = 5;
-    northDiv.h = 215;
-    northDiv.x = ((WINDOW_X - rect.w) / 2) + 22.5;
-    northDiv.y = 0;
+    SDL_Rect northDiv = { ((WINDOW_X - rect.w) / 2) + 22.5, 0, 5, 215 };
     SDL_FillRect(win_surface, &northDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     //east
-    east.w = 295; 
-    east.h = 50;
-    east.x = ((WINDOW_X - rect.w) / 2) + 50;
-    east.y = (WINDOW_Y - rect.h) / 2;
+    SDL_Rect east = { ((WINDOW_X - rect.w) / 2) + 50, (WINDOW_Y - rect.h) / 2, 295, 50 };
     SDL_FillRect(win_surface, &east, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    eastDiv.w = 295;
-    eastDiv.h = 5;
-    eastDiv.x = ((WINDOW_X - rect.w) / 2) + 50;
-    eastDiv.y = ((WINDOW_Y - rect.h) / 2) + 20;
+    SDL_Rect eastDiv = { ((WINDOW_X - rect.w) / 2) + 50, ((WINDOW_Y - rect.h) / 2) + 20, 295, 5 };
     SDL_FillRect(win_surface, &eastDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     //south
-    south.w = 50;
-    south.h = 215;
-    south.x = (WINDOW_X - rect.w) / 2;
-    south.y = ((WINDOW_Y - rect.h) / 2) + 50;
+    SDL_Rect south = { (WINDOW_X - rect.w) / 2, ((WINDOW_Y - rect.h) / 2) + 50, 50, 215 };
     SDL_FillRect(win_surface, &south, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    southDiv.w = 5;
-    southDiv.h = 215;
-    southDiv.x = ((WINDOW_X - rect.w) / 2) + 22.5;
-    southDiv.y = ((WINDOW_Y - rect.h) / 2) + 50;
+    SDL_Rect southDiv = { ((WINDOW_X - rect.w) / 2) + 22.5, ((WINDOW_Y - rect.h) / 2) + 50, 5, 215 };
     SDL_FillRect(win_surface, &southDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     //west
-    west.w = 295;
-    west.h = 50;
-    west.x = 0;
-    west.y = (WINDOW_Y - rect.h) / 2;
+    SDL_Rect west = { 0, (WINDOW_Y - rect.h) / 2, 295, 50 };
     SDL_FillRect(win_surface, &west, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    westDiv.w = 295;
-    westDiv.h = 5;
-    westDiv.x = 0;
-    westDiv.y = ((WINDOW_Y - rect.h) / 2) + 20;
+    SDL_Rect westDiv = { 0, ((WINDOW_Y - rect.h) / 2) + 20, 295, 5 };
     SDL_FillRect(win_surface, &westDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
-
 
     SDL_UpdateWindowSurface(win);
 }

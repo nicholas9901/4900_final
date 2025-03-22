@@ -14,7 +14,7 @@ OBJS_NOGUI      = $(addprefix $(DIR_BUILD_NOGUI)/, $(OBJS))
 FLAGS           = -g
 DFLAGS_GUI      = -D GUI=1
 DFLAGS_NOGUI    = -D GUI=0
-LIBS			= -lSDL2main -lSDL2 
+LIBS			= -lSDL2main -lSDL2 -lSDL2_image
 
 all: gui nogui
 
