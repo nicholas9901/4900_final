@@ -1,29 +1,20 @@
-#include "prototypes.h"
-#include <unistd.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
-#define WINDOW_NAME "Traffic Simulator"
-#define WINDOW_X    640
-#define WINDOW_Y    480
-
-#define COLOR_WHITE 255, 255, 255
-#define COLOR_GRAY  150, 150, 150
-#define COLOR_BLACK 0, 0, 0
-#define COLOR_YELLOW 255, 255, 0
-
-void move_horizontal(SDL_Texture*, SDL_Rect);
-void move_vertical(SDL_Texture*, SDL_Rect);
-void right_turn(SDL_Texture*, SDL_Rect);
+#include "draw.h"
 
 SDL_Window* win;
 SDL_Renderer* renderer; //apply transformations to images
+char run_path[PATH_SIZE];
+char path_assets_car[PATH_SIZE];
 
-/* draw_gui: Initial draw function, draws the background and intersections */
+/* 
+draw_gui: 
+    Initial draw function, draws the background and intersections 
+*/
 void draw_gui(vehicle_T* vehicles, intersection_T* intersections)
 {
+    SDL_Event event;
     SDL_Init(SDL_INIT_EVERYTHING);
     IMG_Init(IMG_INIT_PNG);
+    initialize_assets();
 
     win = SDL_CreateWindow(
         WINDOW_NAME, 
@@ -32,6 +23,7 @@ void draw_gui(vehicle_T* vehicles, intersection_T* intersections)
         WINDOW_X, 
         WINDOW_Y, 
         SDL_WINDOW_SHOWN);
+
     
     if (!win) {
         printf("Failed to create window: %s", SDL_GetError());
@@ -51,12 +43,22 @@ void draw_gui(vehicle_T* vehicles, intersection_T* intersections)
     draw_intersection(&intersections[0]);
     draw_vehicle(&vehicles[0]);
     SDL_UpdateWindowSurface(win);
-    sleep(3);
+    
+    while(1) {
+        SDL_PollEvent(&event);
+        if (event.type == SDL_QUIT) {
+            break;
+        }
+    }
+
+    exit_gui();
 }
 
-/* update_gui: Updates the GUI with vehicle positions and intersection phase
- *             changes
- */
+/* 
+update_gui: 
+    Updates the GUI with vehicle positions and intersection phase changes
+*/
+
 void update_gui(vehicle_T* vehicles, intersection_T* intersections)
 {
 
@@ -168,9 +170,9 @@ void draw_vehicle(vehicle_T* vehicle)
     if (!win) return;
 
     SDL_Surface* win_surface = SDL_GetWindowSurface(win);
-    SDL_Texture* icon = IMG_LoadTexture(renderer, "../assets/car.png");
+    SDL_Texture* icon = IMG_LoadTexture(renderer, path_assets_car);
     if (!icon) {
-        printf("Failed to load vehicle icon \n");
+        printf("Failed to load vehicle icon: %s \n", path_assets_car);
     }
 
     //get attributes of texture
@@ -241,4 +243,37 @@ void draw_intersection(intersection_T* intersection)
     SDL_FillRect(win_surface, &westDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     SDL_UpdateWindowSurface(win);
+}
+
+void initialize_assets()
+{
+    trim_run_path();
+    /* Car */
+    strcpy(path_assets_car, run_path);
+    strcat(path_assets_car, PATH_IMG_CAR);
+
+    /*  */
+}
+
+void trim_run_path()
+{
+    char* base_path = PATH_BASE;
+    char* j = base_path;
+    char* i_curr;
+
+    for (char* i = run_path; *i != '\0'; i++) {
+        i_curr = i;
+        j = base_path;
+        while (*i_curr == *j) {
+            j++;
+            i_curr++;
+            if (*j == '\0') {
+                *(i_curr + 1) = '\0';
+                return;
+            }
+        }
+    }
+
+    printf("Error: Could not establish correct path\n");
+    exit(1);
 }

@@ -1,63 +1,40 @@
+/*
+prototypes.h:
+    Includes all function definitions for all C files aside from print.c
+    and draw.c--those two files have their own definitions since they aren't
+    a part of the NOGUI build.
+*/
+
 #ifndef PROTOTYPES_H
 #define PROTOTYPES_H
 
 #include "definitions.h"
 
 /* vector.c */
-void init_vector(vector_T*, float, float);
-
-#if GUI
-void print_vector(vector_T*);
-#endif
+void init_vector(vector_T*, short, short);
 
 /* instructions.c */
-
-void init_instructions
-(
+void init_instructions(
     instructions_T*,
     direction_T*,
-    int
-);
+    int);
 
 /* vehicle.c */
-void init_vehicle 
-(
+void init_vehicle(
     vehicle_T*,
     intersection_T*,
     instructions_T*, 
     direction_T,
     vehicle_priority_T,
-    float,
-    float
-);
-
-#if GUI
-void print_vehicle(vehicle_T*, int);
-#endif
+    short);
 
 /* intersection.c */
-void init_intersection
-(
+void init_intersection(
     intersection_T*,
     intersection_T*,
     intersection_T*,
     intersection_T*,
     intersection_T*,
-    float[MAX_CONNECTIONS]
-);
-
-#if GUI
-void print_intersection(intersection_T*);
-#endif
-
-/* draw.c */
-#if GUI
-void draw_gui();
-void update_gui(vehicle_T*, intersection_T*);
-void exit_gui();
-void draw_vehicle(vehicle_T*);
-void draw_intersection(intersection_T*);
-
-#endif
+    short[MAX_CONNECTIONS]);
 
 #endif /* PROTOTYPES_H */

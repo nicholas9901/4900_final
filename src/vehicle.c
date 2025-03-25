@@ -6,8 +6,7 @@ void init_vehicle(
     instructions_T* instructions, 
     direction_T initial_direction,
     vehicle_priority_T priority,
-    float max_speed,
-    float acceleration)
+    short speed)
 {
     init_vector(
         &(vehicle->location), 
@@ -18,22 +17,5 @@ void init_vehicle(
         
     vehicle->instructions = instructions;
     vehicle->priority     = priority;
-    vehicle->max_speed    = max_speed;
-    vehicle->acceleration = acceleration;
+    vehicle->speed        = speed;
 }
-
-#if GUI
-void print_vehicle(vehicle_T* vehicle, int id)
-{
-    printf("Vehicle %d:\n       (x,y): ", id);
-    print_vector(&(vehicle->location));
-    printf(
-        "\n       speed: %f\n"
-        "       accel: %f\n"
-        "   max_speed: %f\n",
-        0.0f, // TODO: add a function to get speed
-        vehicle->acceleration,
-        vehicle->max_speed);
-    // TODO: need to add print instructions function
-}
-#endif

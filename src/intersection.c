@@ -6,7 +6,7 @@ void init_intersection(
     intersection_T* connection_east,
     intersection_T* connection_south,
     intersection_T* connection_west,
-    float road_lengths[MAX_CONNECTIONS])
+    short road_lengths[MAX_CONNECTIONS])
 {
     intersection->curr_phase         = HORIZONTAL_SR;
     intersection->connections[NORTH] = connection_north;
