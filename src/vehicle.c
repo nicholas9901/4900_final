@@ -24,7 +24,7 @@ void init_vehicle(
     vehicle->intersection = intersection;
     vehicle->instructions = instructions;
     vehicle->priority     = priority;
-    vehicle->turning      = TURNING_YES;
+    vehicle->turning      = true;
     vehicle->speed        = speed;
 }
 

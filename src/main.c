@@ -14,25 +14,38 @@ int main(int argc, char** argv) {
     /* Initializing the structures */
     intersection_T intersections[NUM_INTERSECTIONS];
     vehicle_T      vehicles[NUM_VEHICLES];
-    direction_T    list_instructions[4];
-    list_instructions[0] = NORTH;
-    list_instructions[1] = EAST;
-    list_instructions[2] = SOUTH;
-    list_instructions[3] = WEST;
+    direction_T    list_instructions[2];
+    list_instructions[0] = SOUTH;
+    list_instructions[1] = WEST;
 
     instructions_T vi1;
-    init_instructions(&vi1, list_instructions, 4);
+    init_instructions(&vi1, list_instructions, 2);
     
     int rl1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
+
     init_intersection(
         &(intersections[0]), 
         &(intersections[0]), 
+        &(intersections[1]), 
         &(intersections[0]), 
+        &(intersections[1]), 
+        rl1);
+
+    init_intersection(
+        &(intersections[1]), 
+        &(intersections[1]), 
         &(intersections[0]), 
+        &(intersections[1]), 
         &(intersections[0]), 
         rl1);
 
-    init_intersection_locations(&(intersections[0]));
+    /* Intersection coordinate generation */
+    init_vector(
+        &(intersections[0].location),
+        INIT_INTERSECTION_START_X, 
+        INIT_INTERSECTION_START_Y);
+
+    init_intersection_construction(&(intersections[0]));
 
     init_vehicle(
         &(vehicles[0]),
@@ -44,6 +57,7 @@ int main(int argc, char** argv) {
     #if GUI
     print_vehicle(&(vehicles[0]), 1);
     print_intersection(&(intersections[0]), 1);
+    print_intersection(&(intersections[1]), 2);
     init_gui(vehicles, intersections);
     #endif
     /* Main program loop */

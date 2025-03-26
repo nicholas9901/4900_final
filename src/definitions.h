@@ -4,8 +4,7 @@
 #include <unistd.h>
 
 /* struct constants */
-#define NUM_INTERSECTIONS  1
-#define NUM_INSTRUCTIONS_1 4
+#define NUM_INTERSECTIONS  2
 #define NUM_VEHICLES       1
 
 /* intersection constants */
@@ -29,8 +28,6 @@
 /* enumerated types */
 typedef enum {NORTH, EAST, SOUTH, WEST} direction_T;
 typedef enum {PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW} vehicle_priority_T;
-typedef enum {OFFSET_NO, OFFSET_YES} offset_T;
-typedef enum {TURNING_NO, TURNING_YES} turning_T;
 
 /*
 Types of phases
@@ -78,6 +75,7 @@ typedef struct intersection {
     struct intersection* connections[MAX_CONNECTIONS]; 
     int lengths[MAX_CONNECTIONS];
     int turning_points[MAX_CONNECTIONS];
+    bool constructed;
 } intersection_T;
 
 /* vehicle */
@@ -86,6 +84,6 @@ typedef struct {
     intersection_T* intersection;
     instructions_T* instructions;
     vehicle_priority_T priority;
-    turning_T turning;
+    bool turning;
     int speed;
 } vehicle_T;

@@ -48,6 +48,6 @@ void init_intersection(
     intersection_T*,
     int[MAX_CONNECTIONS]);
 
-void init_intersection_locations(intersection_T*);
+void init_intersection_construction(intersection_T*);
 
 #endif /* PROTOTYPES_H */

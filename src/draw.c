@@ -45,11 +45,11 @@ void init_gui(vehicle_T* vehicles, intersection_T* intersections)
     SDL_Surface* win_surface = SDL_GetWindowSurface(win);
     SDL_FillRect(win_surface, NULL, SDL_MapRGB(win_surface->format, COLOR_WHITE));
     for (int i = 0; i < NUM_INTERSECTIONS; i++) {
-        draw_intersection(&intersections[0]);
+        draw_intersection(&(intersections[i]));
     }
 
     for (int i = 0; i < NUM_VEHICLES; i++) {
-        draw_vehicle(&vehicles[0]);
+        draw_vehicle(&(vehicles[i]));
     }
 
     SDL_UpdateWindowSurface(win);
