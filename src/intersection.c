@@ -61,7 +61,7 @@ void init_intersection_locations(intersection_T* intersection)
         LANE_OFFSET;
 
     /* Turning points */
-    intersection[0].turning_points[NORTH] = intersection[0].location.y - 
+    intersection[0].turning_points[NORTH] = intersection[0].location.y + 
         LANE_OFFSET;
 
     intersection[0].turning_points[EAST] = intersection[0].location.x;

@@ -40,19 +40,24 @@ void move(vehicle_T* vehicle)
             if (vehicle->turning) {
                 switch (vehicle->instructions->list[vehicle->instructions->next]) {
                     case EAST:
-                        if (vehicle->location.y + vehicle->speed <= 
+                        if (vehicle->location.y - vehicle->speed <= 
                             vehicle->intersection->turning_points[NORTH])
                         {
+                            vehicle->location.y = 
+                                vehicle->intersection->turning_points[NORTH];
+
+                            next_instruction(vehicle->instructions);   
+                            vehicle->turning = false; 
                             return;                            
                         }
                         break;
                     case WEST:
                         if (vehicle->location.y - vehicle->speed <= 
-                            vehicle->intersection->turning_points[NORTH] + 
+                            vehicle->intersection->turning_points[NORTH] - 
                             LANE_OFFSET) 
                         {
                             vehicle->location.y = 
-                                vehicle->intersection->turning_points[NORTH] + LANE_OFFSET;
+                                vehicle->intersection->turning_points[NORTH] - LANE_OFFSET;
 
                             next_instruction(vehicle->instructions);   
                             vehicle->turning = false; 
@@ -81,7 +86,15 @@ void move(vehicle_T* vehicle)
             if (vehicle->turning) {
                 switch (vehicle->instructions->list[vehicle->instructions->next]) {
                     case NORTH:
-                        if (determine_turn_x(vehicle, EAST, true)) {
+                        if (vehicle->location.x + vehicle->speed >= 
+                            vehicle->intersection->turning_points[EAST] + 
+                            LANE_OFFSET)
+                        {
+                            vehicle->location.x = 
+                                vehicle->intersection->turning_points[EAST] + LANE_OFFSET;
+                
+                            next_instruction(vehicle->instructions);   
+                            vehicle->turning = false;
                             return;  
                         }
                         break;
@@ -133,7 +146,14 @@ void move(vehicle_T* vehicle)
                         }
                         break;
                     case WEST:
-                        if ((determine_turn_y(vehicle, SOUTH, false))) {
+                        if (vehicle->location.y + vehicle->speed >= 
+                            vehicle->intersection->turning_points[SOUTH])
+                        {
+                            vehicle->location.y = 
+                                vehicle->intersection->turning_points[SOUTH];
+                
+                            next_instruction(vehicle->instructions);   
+                            vehicle->turning = false;
                             return;
                         }
                         break;
@@ -171,7 +191,15 @@ void move(vehicle_T* vehicle)
                         }
                         break;
                     case SOUTH:
-                        if (determine_turn_x(vehicle, WEST, true)) {
+                        if (vehicle->location.x - vehicle->speed <= 
+                            vehicle->intersection->turning_points[WEST] - 
+                            LANE_OFFSET)
+                        {
+                            vehicle->location.x = 
+                                vehicle->intersection->turning_points[WEST] - LANE_OFFSET;
+
+                            next_instruction(vehicle->instructions);   
+                            vehicle->turning = false; 
                             return;
                         }
                         break;
@@ -196,107 +224,4 @@ void move(vehicle_T* vehicle)
         default:
             direction_error(vehicle->instructions->list[vehicle->instructions->current]);
     }
-}
-
-/*
-Determine Turn
-    Determine if a turn should take place or not, 0 if no, 1 if yes.
-*/
-bool determine_turn_x(vehicle_T* vehicle, direction_T direction, bool offset)
-{
-    if (offset) {
-        if (vehicle->location.x + vehicle->speed >= 
-            vehicle->intersection->turning_points[direction] + 
-            LANE_OFFSET)
-        {
-            vehicle->location.x = 
-                vehicle->intersection->turning_points[direction] + LANE_OFFSET;
-
-            next_instruction(vehicle->instructions);   
-            vehicle->turning = false; 
-            return true;
-        }   
-    } 
-    else {
-        if (vehicle->location.x + vehicle->speed >= 
-            vehicle->intersection->turning_points[direction])
-        {
-            vehicle->location.x = 
-                vehicle->intersection->turning_points[direction];
-
-            next_instruction(vehicle->instructions);   
-            vehicle->turning = false;
-            return true;
-        }   
-
-    }
-    return false;;
-}
-
-bool determine_turn_y(vehicle_T* vehicle, direction_T direction, bool offset)
-{
-    if (offset) {
-        if (vehicle->location.y + vehicle->speed >= 
-            vehicle->intersection->turning_points[direction] + 
-            LANE_OFFSET)
-        {
-            vehicle->location.y = 
-                vehicle->intersection->turning_points[direction] + LANE_OFFSET;
-
-            next_instruction(vehicle->instructions);   
-            vehicle->turning = false; 
-            return true;
-        }   
-    } 
-    else {
-        if (vehicle->location.y + vehicle->speed >= 
-            vehicle->intersection->turning_points[direction])
-        {
-            vehicle->location.y = 
-                vehicle->intersection->turning_points[direction];
-
-            next_instruction(vehicle->instructions);   
-            vehicle->turning = false;
-            return true;
-        }   
-
-    }
-    return false;
-}
-
-/*
-Intersection Transition
-    
-*/
-bool determine_transition_x(vehicle_T* vehicle, direction_T direction)
-{
-    int difference = 0;
-    if ((difference = vehicle->location.x + vehicle->speed - 
-        vehicle->intersection->endpoints[direction].x) >= 0) 
-    {
-        vehicle->location.x = 
-            vehicle->intersection->connections[direction]->endpoints[determine_connection(direction)].x 
-            + difference;
-
-        vehicle->intersection = vehicle->intersection->connections[direction];
-        vehicle->turning = true;
-        return true;
-    }
-    return false;}
-
-bool determine_transition_y(vehicle_T* vehicle, direction_T direction)
-{
-    int difference = 0;
-    if ((difference = vehicle->location.y + vehicle->speed - 
-        vehicle->intersection->endpoints[direction].y) >= 0) 
-    {
-        vehicle->location.y = 
-            vehicle->intersection->connections[direction]->endpoints[determine_connection(direction)].y 
-            + difference;
-
-        vehicle->intersection = vehicle->intersection->connections[direction];
-        vehicle->turning = true;
-        return true;
-    }
-    return false;
 }

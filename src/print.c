@@ -53,15 +53,23 @@ void print_intersection(intersection_T* intersection, int id)
 {
     printf("Intersection %d:\n  (x,y): ", id);
     print_vector(&(intersection->location));
+    
     /* Endpoints */
-
-    printf("\n  Endpoints:\n    North Endpoint: ");
+    printf("\n  Endpoints:\n    North: ");
     print_vector(&(intersection->endpoints[NORTH]));
-    printf("\n    East Endpoint: ");
+    printf("\n    East: ");
     print_vector(&(intersection->endpoints[EAST]));
-    printf("\n    South Endpoint: ");
+    printf("\n    South: ");
     print_vector(&(intersection->endpoints[SOUTH]));
-    printf("\n    West Endpoint: ");
+    printf("\n    West: ");
     print_vector(&(intersection->endpoints[WEST]));
-    printf("\n");
+
+    /* Turning Points */
+    printf(
+        "\n  Turning Points:\n    North: %d\n    East: %d\n    South: %d\n    West: %d\n",
+        intersection->turning_points[NORTH],
+        intersection->turning_points[EAST],
+        intersection->turning_points[SOUTH],
+        intersection->turning_points[WEST]
+    );
 }
