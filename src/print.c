@@ -45,6 +45,7 @@ void print_vehicle(vehicle_T* vehicle, int id)
     printf("Vehicle %d:\n   (x,y): ", id);
     print_vector(&(vehicle->location));
     printf("\n  Speed: %d\n", vehicle->speed);
+    printf("  Turning: %d\n", vehicle->turning);
     print_instructions(vehicle->instructions);
 }
 
@@ -52,5 +53,15 @@ void print_intersection(intersection_T* intersection, int id)
 {
     printf("Intersection %d:\n  (x,y): ", id);
     print_vector(&(intersection->location));
+    /* Endpoints */
+
+    printf("\n  Endpoints:\n    North Endpoint: ");
+    print_vector(&(intersection->endpoints[NORTH]));
+    printf("\n    East Endpoint: ");
+    print_vector(&(intersection->endpoints[EAST]));
+    printf("\n    South Endpoint: ");
+    print_vector(&(intersection->endpoints[SOUTH]));
+    printf("\n    West Endpoint: ");
+    print_vector(&(intersection->endpoints[WEST]));
     printf("\n");
 }

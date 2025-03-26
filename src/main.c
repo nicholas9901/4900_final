@@ -12,16 +12,16 @@ int main(int argc, char** argv) {
     #endif
 
     /* Initializing the structures */
-    intersection_T intersections[NUM_INSTRUCTIONS];
+    intersection_T intersections[NUM_INTERSECTIONS];
     vehicle_T      vehicles[NUM_VEHICLES];
-    direction_T    list_instructions[NUM_INSTRUCTIONS];
-    list_instructions[0] = EAST;
-    list_instructions[1] = SOUTH;
+    direction_T    list_instructions[2];
+    list_instructions[0] = NORTH;
+    list_instructions[1] = WEST;
 
     instructions_T vi1;
-    init_instructions(&vi1, list_instructions, NUM_INSTRUCTIONS);
+    init_instructions(&vi1, list_instructions, 2);
     
-    int rl1[MAX_CONNECTIONS] = {DEFAULT_LENGTH*2, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
+    int rl1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
     init_intersection(
         &(intersections[0]), 
         &(intersections[0]), 
@@ -44,7 +44,6 @@ int main(int argc, char** argv) {
     print_intersection(&(intersections[0]), 1);
     init_gui(vehicles, intersections);
     #endif
-
     /* Main program loop */
     while(1) {
         for (int idx_vehicle = 0; idx_vehicle < NUM_VEHICLES; idx_vehicle++) {

@@ -34,8 +34,10 @@ void init_vehicle(
     int);
 
 void move(vehicle_T*);
-int transition_x(vehicle_T*, direction_T, int);
-int transition_y(vehicle_T*, direction_T, int);
+bool determine_turn_x(vehicle_T*, direction_T, bool);
+bool determine_turn_y(vehicle_T*, direction_T, bool);
+bool determine_transition_x(vehicle_T*, direction_T);
+bool determine_transition_y(vehicle_T*, direction_T);
 
 /* intersection.c */
 void init_intersection(
