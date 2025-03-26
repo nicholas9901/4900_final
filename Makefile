@@ -7,6 +7,7 @@ HEADERS         = $(DIR_SRC)/prototypes.h $(DIR_SRC)/definitions.h
 HEADERS_GUI		= $(DIR_SRC)/print.h $(DIR_SRC)/draw.h
 OBJS            = main.o \
                   vector.o \
+				  direction.o \
                   vehicle.o \
                   intersection.o \
 				  instructions.o

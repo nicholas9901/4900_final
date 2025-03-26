@@ -2,19 +2,21 @@
 
 SDL_Window* win;
 SDL_Renderer* renderer; //apply transformations to images
+SDL_Event event;
+SDL_Texture* car_texture;
+SDL_Rect curr_pos;
+
 char run_path[PATH_SIZE];
 char path_assets_car[PATH_SIZE];
 
 /* 
-draw_gui: 
+init_gui: 
     Initial draw function, draws the background and intersections 
 */
-void draw_gui(vehicle_T* vehicles, intersection_T* intersections)
+void init_gui(vehicle_T* vehicles, intersection_T* intersections)
 {
-    SDL_Event event;
     SDL_Init(SDL_INIT_EVERYTHING);
     IMG_Init(IMG_INIT_PNG);
-    initialize_assets();
 
     win = SDL_CreateWindow(
         WINDOW_NAME, 
@@ -37,31 +39,37 @@ void draw_gui(vehicle_T* vehicles, intersection_T* intersections)
         exit(1);
     }
 
+    initialize_assets();
+
+    /* Set the background color */
     SDL_Surface* win_surface = SDL_GetWindowSurface(win);
     SDL_FillRect(win_surface, NULL, SDL_MapRGB(win_surface->format, COLOR_WHITE));
-
-    draw_intersection(&intersections[0]);
-    draw_vehicle(&vehicles[0]);
-    SDL_UpdateWindowSurface(win);
-    
-    while(1) {
-        SDL_PollEvent(&event);
-        if (event.type == SDL_QUIT) {
-            break;
-        }
+    for (int i = 0; i < NUM_INTERSECTIONS; i++) {
+        draw_intersection(&intersections[0]);
     }
 
-    exit_gui();
+    for (int i = 0; i < NUM_VEHICLES; i++) {
+        draw_vehicle(&vehicles[0]);
+    }
+
+    SDL_UpdateWindowSurface(win);
 }
 
 /* 
 update_gui: 
     Updates the GUI with vehicle positions and intersection phase changes
 */
-
 void update_gui(vehicle_T* vehicles, intersection_T* intersections)
 {
-
+    SDL_Surface* win_surface = SDL_GetWindowSurface(win);
+    for (int i = 0; i < NUM_VEHICLES; i++) {
+        SDL_RenderFillRect(renderer, &curr_pos);
+        curr_pos.x = vehicles[0].location.x;
+        curr_pos.y = vehicles[0].location.y;
+        // SDL_FillRect(win_surface, &curr_pos, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
+        SDL_RenderCopyEx(renderer, car_texture, NULL, &curr_pos, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    SDL_RenderPresent(renderer);
 }
 
 void exit_gui()
@@ -167,82 +175,105 @@ void right_turn(SDL_Texture* vehicle, SDL_Rect pos) {
 
 void draw_vehicle(vehicle_T* vehicle)
 {
-    if (!win) return;
-
-    SDL_Surface* win_surface = SDL_GetWindowSurface(win);
-    SDL_Texture* icon = IMG_LoadTexture(renderer, path_assets_car);
-    if (!icon) {
-        printf("Failed to load vehicle icon: %s \n", path_assets_car);
-    }
-
     //get attributes of texture
-    int icon_w, icon_h;
-    SDL_QueryTexture(icon, NULL, NULL, &icon_w, &icon_h);
-
-    //vehicle posiitons for testing
-    
-    //west --> east
-    //SDL_Rect icon_pos = { 100, 235, icon_w, icon_h };
-    //SDL_RenderCopyEx(renderer, icon, NULL, &icon_pos, 90.0, NULL, SDL_FLIP_NONE);
-
-    //east --> west
-    //SDL_Rect icon_pos = { 550, 210, icon_w, icon_h };
-    //SDL_RenderCopyEx(renderer, icon, NULL, &icon_pos, 90.0, NULL, SDL_FLIP_VERTICAL);
-
-    //north --> south
-    //SDL_Rect icon_pos = { 290, 80, icon_w, icon_h };
-    //SDL_RenderCopyEx(renderer, icon, NULL, &icon_pos, 180.0, NULL, SDL_FLIP_NONE);
-
-    //south --> north
-    SDL_Rect icon_pos = { 318, 400, icon_w, icon_h };
-    SDL_RenderCopyEx(renderer, icon, NULL, &icon_pos, 0.0, NULL, SDL_FLIP_NONE);
-
+    curr_pos.w = CAR_SIZE;
+    curr_pos.h = CAR_SIZE;
+    curr_pos.x = vehicle->location.x;
+    curr_pos.y = vehicle->location.y;
+    SDL_RenderCopyEx(renderer, car_texture, NULL, &curr_pos, 0.0, NULL, SDL_FLIP_NONE);
     SDL_RenderPresent(renderer);
-    //move_horizontal(icon, icon_pos);
-    move_vertical(icon, icon_pos);
 }
 
 void draw_intersection(intersection_T* intersection)
 {
-    if (!win) return;
-
     SDL_Surface* win_surface = SDL_GetWindowSurface(win);
 
     //intersection
-    SDL_Rect rect = { .w = 50, .h = 50 };
-    rect.x = (WINDOW_X - rect.w) / 2;
-    rect.y = (WINDOW_Y - rect.h) / 2;
-    SDL_FillRect(win_surface, &rect, SDL_MapRGB(win_surface->format, COLOR_BLACK));
+    SDL_Rect center = { 
+        .w = INTERSECTION_SIZE, 
+        .h = INTERSECTION_SIZE,
+        .x = intersection->location.x,
+        .y = intersection->location.y
+    };
+    SDL_FillRect(win_surface, &center, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
     //north
-    SDL_Rect north = { (WINDOW_X - rect.w) / 2, 0, 50, 215 };
+    SDL_Rect north = { 
+        .w = INTERSECTION_SIZE,
+        .h = intersection->lengths[NORTH],
+        .x = center.x,
+        .y = center.y - intersection->lengths[NORTH],
+    };
     SDL_FillRect(win_surface, &north, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    SDL_Rect northDiv = { ((WINDOW_X - rect.w) / 2) + 22.5, 0, 5, 215 };
+    SDL_Rect northDiv = { 
+        .w = DIV_WIDTH,
+        .h = north.h,
+        .x = north.x + DIV_OFFSET,
+        .y = north.y
+    };
     SDL_FillRect(win_surface, &northDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     //east
-    SDL_Rect east = { ((WINDOW_X - rect.w) / 2) + 50, (WINDOW_Y - rect.h) / 2, 295, 50 };
+    SDL_Rect east = { 
+        .w = intersection->lengths[EAST],
+        .h = INTERSECTION_SIZE,
+        .x = center.x + INTERSECTION_SIZE,
+        .y = center.y
+    };
     SDL_FillRect(win_surface, &east, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    SDL_Rect eastDiv = { ((WINDOW_X - rect.w) / 2) + 50, ((WINDOW_Y - rect.h) / 2) + 20, 295, 5 };
+    SDL_Rect eastDiv = {
+        .w = east.h,
+        .h = DIV_WIDTH,
+        .x = east.x,
+        .y = east.y + DIV_OFFSET
+    };
     SDL_FillRect(win_surface, &eastDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     //south
-    SDL_Rect south = { (WINDOW_X - rect.w) / 2, ((WINDOW_Y - rect.h) / 2) + 50, 50, 215 };
+    SDL_Rect south = {
+        .w = INTERSECTION_SIZE,
+        .h = intersection->lengths[SOUTH],
+        .x = center.x,
+        .y = center.y + INTERSECTION_SIZE
+    };
     SDL_FillRect(win_surface, &south, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    SDL_Rect southDiv = { ((WINDOW_X - rect.w) / 2) + 22.5, ((WINDOW_Y - rect.h) / 2) + 50, 5, 210 };
+    SDL_Rect southDiv = {
+        .w = DIV_WIDTH,
+        .h = south.h,
+        .x = south.x + DIV_OFFSET,
+        .y = south.y
+    };
     SDL_FillRect(win_surface, &southDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     //west
-    SDL_Rect west = { 0, (WINDOW_Y - rect.h) / 2, 295, 50 };
+    SDL_Rect west = {
+        .w = intersection->lengths[WEST],
+        .h = INTERSECTION_SIZE,
+        .x = center.x - intersection->lengths[WEST],
+        .y = center.y
+    };
     SDL_FillRect(win_surface, &west, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    SDL_Rect westDiv = { 0, ((WINDOW_Y - rect.h) / 2) + 20, 295, 5 };
+    SDL_Rect westDiv = {
+        .w = west.h,
+        .h = DIV_WIDTH,
+        .x = west.x,
+        .y = west.y + DIV_OFFSET
+    };
     SDL_FillRect(win_surface, &westDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     SDL_UpdateWindowSurface(win);
+}
+
+void poll_for_exit()
+{
+    SDL_PollEvent(&event);
+    if (event.type == SDL_QUIT) {
+        exit(1);
+    }
 }
 
 void initialize_assets()
@@ -252,7 +283,11 @@ void initialize_assets()
     strcpy(path_assets_car, run_path);
     strcat(path_assets_car, PATH_IMG_CAR);
 
-    /*  */
+    car_texture = IMG_LoadTexture(renderer, path_assets_car);
+
+    if (!car_texture) {
+        printf("Failed to load vehicle icon (%s), %s\n", path_assets_car, SDL_GetError());
+    }
 }
 
 void trim_run_path()
