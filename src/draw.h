@@ -11,10 +11,8 @@
 #define COLOR_GRAY   150, 150, 150
 #define COLOR_BLACK  0, 0, 0
 #define COLOR_YELLOW 255, 255, 0
-
-/* Drawing definitions */
-#define DIV_WIDTH 4 /* Lane division */
-#define DIV_OFFSET ((INTERSECTION_SIZE / 2) - DIV_WIDTH + 1)
+#define COLOR_RED    255, 0, 0,
+#define COLOR_GREEN  0, 255, 0
 
 /* Asset-related definitions */
 #define PATH_SIZE 256

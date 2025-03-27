@@ -214,6 +214,8 @@ void draw_intersection(intersection_T* intersection)
     };
     SDL_FillRect(win_surface, &northDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
+
+        
     //east
     SDL_Rect east = { 
         .w = intersection->lengths[EAST],
@@ -264,6 +266,40 @@ void draw_intersection(intersection_T* intersection)
         .y = west.y + DIV_OFFSET
     };
     SDL_FillRect(win_surface, &westDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
+
+    /* Stopping points */
+    SDL_Rect north_stop = {
+        .w = INTERSECTION_SIZE,
+        .h = DIV_WIDTH,
+        .x = center.x,
+        .y = south.y
+    };
+    SDL_FillRect(win_surface, &north_stop, SDL_MapRGB(win_surface->format, COLOR_GREEN));
+
+    SDL_Rect east_stop = {
+        .w = DIV_WIDTH,
+        .h = INTERSECTION_SIZE,
+        .x = center.x - DIV_WIDTH,
+        .y = center.y
+    };
+    SDL_FillRect(win_surface, &east_stop, SDL_MapRGB(win_surface->format, COLOR_GREEN));
+
+    SDL_Rect south_stop = {
+        .w = INTERSECTION_SIZE,
+        .h = DIV_WIDTH,
+        .x = center.x,
+        .y = center.y - DIV_WIDTH
+    };
+    SDL_FillRect(win_surface, &south_stop, SDL_MapRGB(win_surface->format, COLOR_GREEN));
+
+    SDL_Rect west_stop = {
+        .w = DIV_WIDTH,
+        .h = INTERSECTION_SIZE,
+        .x = east.x,
+        .y = center.y
+    };
+    SDL_FillRect(win_surface, &west_stop, SDL_MapRGB(win_surface->format, COLOR_GREEN));
+
 
     SDL_UpdateWindowSurface(win);
 }

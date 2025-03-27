@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
     intersection_T intersections[NUM_INTERSECTIONS];
     vehicle_T      vehicles[NUM_VEHICLES];
     direction_T    list_instructions[2];
-    list_instructions[0] = SOUTH;
-    list_instructions[1] = WEST;
+    list_instructions[0] = WEST;
+    list_instructions[1] = SOUTH;
 
     instructions_T vi1;
     init_instructions(&vi1, list_instructions, 2);
@@ -62,14 +62,11 @@ int main(int argc, char** argv) {
     #endif
     /* Main program loop */
     while(1) {
-        for (int idx_vehicle = 0; idx_vehicle < NUM_VEHICLES; idx_vehicle++) {
-            move(&vehicles[idx_vehicle]);
+        for (int i = 0; i < NUM_VEHICLES; i++) {
+            move(&(vehicles[i]));
         }
 
-        // for (int idx_intersection; 
-        //     idx_intersection < NUM_INTERSECTIONS; 
-        //     idx_intersection++) 
-        // {
+        // for (int i; i < NUM_INTERSECTIONS; i++) {
 
         // }
         #if GUI

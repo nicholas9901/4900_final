@@ -68,6 +68,23 @@ void init_intersection_construction(intersection_T* intersection)
     intersection->turning_points[WEST] = intersection->location.x +
         LANE_OFFSET;
     
+    /* Stopping points */
+    intersection->stopping_points[NORTH].main = 
+        intersection->stopping_points[NORTH].current =
+        intersection->location.y + INTERSECTION_SIZE + DIV_WIDTH;
+    
+    intersection->stopping_points[EAST].main = 
+        intersection->stopping_points[EAST].current =
+        intersection->location.x - DIV_WIDTH - CAR_SIZE;
+
+    intersection->stopping_points[SOUTH].main = 
+        intersection->stopping_points[SOUTH].current =
+        intersection->location.y - DIV_WIDTH - CAR_SIZE;
+
+    intersection->stopping_points[WEST].main = 
+        intersection->stopping_points[WEST].current =
+        intersection->location.x + INTERSECTION_SIZE + DIV_WIDTH;
+
     intersection->constructed = true;
 
     for (int i = 0; i < MAX_CONNECTIONS; i++) {

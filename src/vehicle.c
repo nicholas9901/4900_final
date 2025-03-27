@@ -37,7 +37,15 @@ void move(vehicle_T* vehicle)
     int difference = 0;
     switch (vehicle->instructions->list[vehicle->instructions->current]) {
         case NORTH:
-            if (vehicle->turning) {
+            if ( // intersection check
+                vehicle->location.y - vehicle->speed -
+                vehicle->intersection->stopping_points[NORTH].current <= 0 ) 
+            {
+                vehicle->location.y = 
+                    vehicle->intersection->stopping_points[NORTH].current;
+                return;
+            } 
+            else if (vehicle->turning) {
                 switch (vehicle->instructions->list[vehicle->instructions->next]) {
                     case EAST:
                         if (vehicle->location.y - vehicle->speed <= 
@@ -83,7 +91,15 @@ void move(vehicle_T* vehicle)
             vehicle->location.y -= vehicle->speed;
             break;
         case EAST:
-            if (vehicle->turning) {
+            if ( // intersection check
+                vehicle->location.x + vehicle->speed -
+                vehicle->intersection->stopping_points[EAST].current >= 0 ) 
+            {
+                vehicle->location.x = 
+                    vehicle->intersection->stopping_points[EAST].current;
+                return;
+            } 
+            else if (vehicle->turning) {
                 switch (vehicle->instructions->list[vehicle->instructions->next]) {
                     case NORTH:
                         if (vehicle->location.x + vehicle->speed >= 
@@ -130,7 +146,15 @@ void move(vehicle_T* vehicle)
             vehicle->location.x += vehicle->speed;
             break;
         case SOUTH:
-            if (vehicle->turning) {
+            if ( // intersection check
+                vehicle->location.y + vehicle->speed -
+                vehicle->intersection->stopping_points[SOUTH].current >= 0 ) 
+            {
+                vehicle->location.y = 
+                    vehicle->intersection->stopping_points[SOUTH].current;
+                return;
+            }
+            else if (vehicle->turning) {
                 switch (vehicle->instructions->list[vehicle->instructions->next]) {
                     case EAST:
                         if (vehicle->location.y + vehicle->speed >= 
@@ -176,6 +200,14 @@ void move(vehicle_T* vehicle)
             vehicle->location.y += vehicle->speed;
             break;
         case WEST:
+            if ( // intersection check
+                vehicle->location.x - vehicle->speed -
+                vehicle->intersection->stopping_points[WEST].current <= 0 ) 
+            {
+                vehicle->location.x = 
+                    vehicle->intersection->stopping_points[WEST].current;
+                return;
+            }
             if (vehicle->turning) {
                 switch (vehicle->instructions->list[vehicle->instructions->next]) {
                     case NORTH:
@@ -225,3 +257,8 @@ void move(vehicle_T* vehicle)
             direction_error(vehicle->instructions->list[vehicle->instructions->current]);
     }
 }
+
+// bool move(vehicle_T* vehicle)
+// {
+//     switch 
+// }

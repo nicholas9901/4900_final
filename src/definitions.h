@@ -12,6 +12,8 @@
 #define INTERSECTION_SIZE 50
 #define DEFAULT_LENGTH    50
 #define LANE_OFFSET       (INTERSECTION_SIZE / 2)
+#define DIV_WIDTH         4 /* Lane division and stopping point widths */
+#define DIV_OFFSET        ((INTERSECTION_SIZE / 2) - DIV_WIDTH + 1)
 
 /* vehicle constants */
 #define DEFAULT_SPEED 2
@@ -75,6 +77,9 @@ typedef struct intersection {
     struct intersection* connections[MAX_CONNECTIONS]; 
     int lengths[MAX_CONNECTIONS];
     int turning_points[MAX_CONNECTIONS];
+    struct stopping_point {
+        int main, current;
+    } stopping_points[MAX_CONNECTIONS];
     bool constructed;
 } intersection_T;
 
