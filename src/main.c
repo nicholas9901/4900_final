@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
     intersection_T intersections[NUM_INTERSECTIONS];
     vehicle_T      vehicles[NUM_VEHICLES];
     direction_T    list_instructions[2];
-    list_instructions[0] = NORTH;
-    list_instructions[1] = EAST;
+    list_instructions[0] = WEST;
+    list_instructions[1] = SOUTH;
 
     instructions_T vi1;
     init_instructions(&vi1, list_instructions, 2);
