@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
     intersection_T intersections[NUM_INTERSECTIONS];
     vehicle_T      vehicles[NUM_VEHICLES];
     direction_T    list_instructions[2];
-    list_instructions[0] = WEST;
-    list_instructions[1] = SOUTH;
+    list_instructions[0] = NORTH;
+    list_instructions[1] = EAST;
 
     instructions_T vi1;
     init_instructions(&vi1, list_instructions, 2);
@@ -28,8 +28,9 @@ int main(int argc, char** argv) {
         &(intersections[0]), 
         &(intersections[1]), 
         &(intersections[0]), 
-        &(intersections[1]), 
-        rl1);
+        &(intersections[1]),
+        rl1,
+        0);
 
     init_intersection(
         &(intersections[1]), 
@@ -37,7 +38,8 @@ int main(int argc, char** argv) {
         &(intersections[0]), 
         &(intersections[1]), 
         &(intersections[0]), 
-        rl1);
+        rl1,
+        1);
 
     /* Intersection coordinate generation */
     init_vector(
@@ -66,9 +68,9 @@ int main(int argc, char** argv) {
             move(&(vehicles[i]));
         }
 
-        // for (int i; i < NUM_INTERSECTIONS; i++) {
-
-        // }
+        for (int i = 0; i < NUM_INTERSECTIONS; i++) {
+            phase_timer(&(intersections[i]));
+        }
         #if GUI
         poll_for_exit(); /* Listen for an exit event before updating */
         update_gui(vehicles, intersections);

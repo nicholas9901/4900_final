@@ -14,6 +14,8 @@
 #define LANE_OFFSET       (INTERSECTION_SIZE / 2)
 #define DIV_WIDTH         4 /* Lane division and stopping point widths */
 #define DIV_OFFSET        ((INTERSECTION_SIZE / 2) - DIV_WIDTH + 1)
+#define PHASE_TIMER       50
+#define NUM_PHASES        4
 
 /* vehicle constants */
 #define DEFAULT_SPEED 2
@@ -73,7 +75,7 @@ intersection
 typedef struct intersection {
     vector_T location;
     vector_T endpoints[MAX_CONNECTIONS];
-    phase_T curr_phase;
+    phase_T phase;
     struct intersection* connections[MAX_CONNECTIONS]; 
     int lengths[MAX_CONNECTIONS];
     int turning_points[MAX_CONNECTIONS];
@@ -81,6 +83,8 @@ typedef struct intersection {
         int main, current;
     } stopping_points[MAX_CONNECTIONS];
     bool constructed;
+    int timer;
+    char id;
 } intersection_T;
 
 /* vehicle */
@@ -90,5 +94,6 @@ typedef struct {
     instructions_T* instructions;
     vehicle_priority_T priority;
     bool turning;
+    bool stopping;
     int speed;
 } vehicle_T;

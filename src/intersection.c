@@ -1,5 +1,9 @@
 #include "prototypes.h"
 
+#if GUI
+#include "draw.h"
+#endif
+
 /*
 Initialize Intersection
     Note that the location isn't set, this will be done when constructing
@@ -11,15 +15,18 @@ void init_intersection(
     intersection_T* connection_east,
     intersection_T* connection_south,
     intersection_T* connection_west,
-    int lengths[MAX_CONNECTIONS])
+    int lengths[MAX_CONNECTIONS],
+    char id)
 {
-    intersection->curr_phase         = HORIZONTAL_SR;
     intersection->connections[NORTH] = connection_north;
     intersection->connections[EAST]  = connection_east;
     intersection->connections[SOUTH] = connection_south;
     intersection->connections[WEST]  = connection_west;
-    
+
+    intersection->phase       = HORIZONTAL_SR;    
     intersection->constructed = false;
+    intersection->timer       = 0;
+    intersection->id          = id;
     
     for (int i = 0; i < MAX_CONNECTIONS; i++) {
         intersection->lengths[i] = lengths[i];
@@ -111,5 +118,23 @@ void init_intersection_construction(intersection_T* intersection)
             }
             init_intersection_construction(intersection->connections[i]);
         }
+    }
+}
+
+/*
+Sample phase algorithm for testing
+*/
+void phase_timer(intersection_T* intersection)
+{
+    if (intersection->timer >= PHASE_TIMER ) {
+        intersection->phase = (intersection->phase + 1) % NUM_PHASES;
+        intersection->timer = 0;
+#if GUI
+        draw_phase_change(intersection);
+        printf("change %d\n", intersection->phase);
+#endif
+    }
+    else { 
+        intersection->timer++; 
     }
 }

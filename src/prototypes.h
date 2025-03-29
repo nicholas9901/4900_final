@@ -34,7 +34,7 @@ void init_vehicle(
     int);
 
 void move(vehicle_T*);
-bool stop(vehicle_T*);
+bool right_of_way(vehicle_T*);
 
 /* intersection.c */
 void init_intersection(
@@ -43,8 +43,10 @@ void init_intersection(
     intersection_T*,
     intersection_T*,
     intersection_T*,
-    int[MAX_CONNECTIONS]);
+    int[MAX_CONNECTIONS],
+    char);
 
 void init_intersection_construction(intersection_T*);
+void phase_timer(intersection_T*);
 
 #endif /* PROTOTYPES_H */

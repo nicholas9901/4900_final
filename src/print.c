@@ -46,6 +46,7 @@ void print_vehicle(vehicle_T* vehicle, int id)
     print_vector(&(vehicle->location));
     printf("\n  Speed: %d\n", vehicle->speed);
     printf("  Turning: %d\n", vehicle->turning);
+    printf(" Stopping: %d\n", vehicle->stopping);
     print_instructions(vehicle->instructions);
 }
 

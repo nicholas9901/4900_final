@@ -1,10 +1,12 @@
 #include "draw.h"
 
 SDL_Window* win;
+SDL_Surface* win_surface;
 SDL_Renderer* renderer; //apply transformations to images
 SDL_Event event;
 SDL_Texture* car_texture;
 SDL_Rect curr_pos;
+intersection_rects_T intersection_rects[NUM_INTERSECTIONS];
 
 char run_path[PATH_SIZE];
 char path_assets_car[PATH_SIZE];
@@ -32,6 +34,13 @@ void init_gui(vehicle_T* vehicles, intersection_T* intersections)
         exit(1);
     }
 
+    win_surface = SDL_GetWindowSurface(win);
+    
+    if (!win_surface) {
+        printf("Failed to create window surface: %s", SDL_GetError());
+        exit(1);
+    }
+
     renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
 
     if (!renderer) {
@@ -42,7 +51,6 @@ void init_gui(vehicle_T* vehicles, intersection_T* intersections)
     initialize_assets();
 
     /* Set the background color */
-    SDL_Surface* win_surface = SDL_GetWindowSurface(win);
     SDL_FillRect(win_surface, NULL, SDL_MapRGB(win_surface->format, COLOR_WHITE));
     for (int i = 0; i < NUM_INTERSECTIONS; i++) {
         draw_intersection(&(intersections[i]));
@@ -61,7 +69,6 @@ update_gui:
 */
 void update_gui(vehicle_T* vehicles, intersection_T* intersections)
 {
-    SDL_Surface* win_surface = SDL_GetWindowSurface(win);
     for (int i = 0; i < NUM_VEHICLES; i++) {
         SDL_RenderFillRect(renderer, &curr_pos);
         curr_pos.x = vehicles[0].location.x;
@@ -206,15 +213,11 @@ void draw_intersection(intersection_T* intersection)
     };
     SDL_FillRect(win_surface, &north, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    SDL_Rect northDiv = { 
-        .w = DIV_WIDTH,
-        .h = north.h,
-        .x = north.x + DIV_OFFSET,
-        .y = north.y
-    };
-    SDL_FillRect(win_surface, &northDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
-
-
+    intersection_rects[intersection->id].divs[NORTH].w = DIV_WIDTH;
+    intersection_rects[intersection->id].divs[NORTH].h = north.h;
+    intersection_rects[intersection->id].divs[NORTH].x = north.x + DIV_OFFSET;
+    intersection_rects[intersection->id].divs[NORTH].y = north.y;
+    SDL_FillRect(win_surface, &(intersection_rects[intersection->id].divs[NORTH]), SDL_MapRGB(win_surface->format, COLOR_YELLOW));
         
     //east
     SDL_Rect east = { 
@@ -225,14 +228,12 @@ void draw_intersection(intersection_T* intersection)
     };
     SDL_FillRect(win_surface, &east, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    SDL_Rect eastDiv = {
-        .w = east.h,
-        .h = DIV_WIDTH,
-        .x = east.x,
-        .y = east.y + DIV_OFFSET
-    };
-    SDL_FillRect(win_surface, &eastDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
-
+    intersection_rects[intersection->id].divs[EAST].w = east.h;
+    intersection_rects[intersection->id].divs[EAST].h = DIV_WIDTH;
+    intersection_rects[intersection->id].divs[EAST].x = east.x;
+    intersection_rects[intersection->id].divs[EAST].y = east.y + DIV_OFFSET;
+    SDL_FillRect(win_surface, &(intersection_rects[intersection->id].divs[EAST]), SDL_MapRGB(win_surface->format, COLOR_YELLOW));
+    
     //south
     SDL_Rect south = {
         .w = INTERSECTION_SIZE,
@@ -242,13 +243,11 @@ void draw_intersection(intersection_T* intersection)
     };
     SDL_FillRect(win_surface, &south, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    SDL_Rect southDiv = {
-        .w = DIV_WIDTH,
-        .h = south.h,
-        .x = south.x + DIV_OFFSET,
-        .y = south.y
-    };
-    SDL_FillRect(win_surface, &southDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
+    intersection_rects[intersection->id].divs[SOUTH].w = DIV_WIDTH;
+    intersection_rects[intersection->id].divs[SOUTH].h = south.h;
+    intersection_rects[intersection->id].divs[SOUTH].x = south.x + DIV_OFFSET;
+    intersection_rects[intersection->id].divs[SOUTH].y = south.y;
+    SDL_FillRect(win_surface, &(intersection_rects[intersection->id].divs[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     //west
     SDL_Rect west = {
@@ -258,50 +257,77 @@ void draw_intersection(intersection_T* intersection)
         .y = center.y
     };
     SDL_FillRect(win_surface, &west, SDL_MapRGB(win_surface->format, COLOR_BLACK));
-
-    SDL_Rect westDiv = {
-        .w = west.h,
-        .h = DIV_WIDTH,
-        .x = west.x,
-        .y = west.y + DIV_OFFSET
-    };
-    SDL_FillRect(win_surface, &westDiv, SDL_MapRGB(win_surface->format, COLOR_YELLOW));
-
+    
+    intersection_rects[intersection->id].divs[WEST].w = west.h;
+    intersection_rects[intersection->id].divs[WEST].h = DIV_WIDTH;
+    intersection_rects[intersection->id].divs[WEST].x = west.x;
+    intersection_rects[intersection->id].divs[WEST].y = west.y + DIV_OFFSET;
+    SDL_FillRect(win_surface, &(intersection_rects[intersection->id].divs[WEST]), SDL_MapRGB(win_surface->format, COLOR_YELLOW));
+    
     /* Stopping points */
-    SDL_Rect north_stop = {
-        .w = INTERSECTION_SIZE,
-        .h = DIV_WIDTH,
-        .x = center.x,
-        .y = south.y
-    };
-    SDL_FillRect(win_surface, &north_stop, SDL_MapRGB(win_surface->format, COLOR_GREEN));
+    intersection_rects[intersection->id].stops[NORTH].w = INTERSECTION_SIZE;
+    intersection_rects[intersection->id].stops[NORTH].h = DIV_WIDTH;
+    intersection_rects[intersection->id].stops[NORTH].x = center.x;
+    intersection_rects[intersection->id].stops[NORTH].y = south.y;
+    SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
+    
+    intersection_rects[intersection->id].stops[EAST].w = DIV_WIDTH;
+    intersection_rects[intersection->id].stops[EAST].h = INTERSECTION_SIZE;
+    intersection_rects[intersection->id].stops[EAST].x = center.x - DIV_WIDTH;
+    intersection_rects[intersection->id].stops[EAST].y = center.y;
+    SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
 
-    SDL_Rect east_stop = {
-        .w = DIV_WIDTH,
-        .h = INTERSECTION_SIZE,
-        .x = center.x - DIV_WIDTH,
-        .y = center.y
-    };
-    SDL_FillRect(win_surface, &east_stop, SDL_MapRGB(win_surface->format, COLOR_GREEN));
+    intersection_rects[intersection->id].stops[SOUTH].w = INTERSECTION_SIZE;
+    intersection_rects[intersection->id].stops[SOUTH].h = DIV_WIDTH;
+    intersection_rects[intersection->id].stops[SOUTH].x = center.x;
+    intersection_rects[intersection->id].stops[SOUTH].y = center.y - DIV_WIDTH;
+    SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
 
-    SDL_Rect south_stop = {
-        .w = INTERSECTION_SIZE,
-        .h = DIV_WIDTH,
-        .x = center.x,
-        .y = center.y - DIV_WIDTH
-    };
-    SDL_FillRect(win_surface, &south_stop, SDL_MapRGB(win_surface->format, COLOR_GREEN));
-
-    SDL_Rect west_stop = {
-        .w = DIV_WIDTH,
-        .h = INTERSECTION_SIZE,
-        .x = east.x,
-        .y = center.y
-    };
-    SDL_FillRect(win_surface, &west_stop, SDL_MapRGB(win_surface->format, COLOR_GREEN));
+    intersection_rects[intersection->id].stops[WEST].w = DIV_WIDTH;
+    intersection_rects[intersection->id].stops[WEST].h = INTERSECTION_SIZE;
+    intersection_rects[intersection->id].stops[WEST].x = east.x;
+    intersection_rects[intersection->id].stops[WEST].y = center.y;
+    SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
 
 
     SDL_UpdateWindowSurface(win);
+}
+
+/*
+Draw Phase Change
+    Colors the stopping rectangles depending on the current phase.
+        Green: Straight and left turns
+        Blue:  Left turns only
+        Red:   Stop
+*/
+void draw_phase_change(intersection_T* intersection)
+{
+    switch (intersection->phase) {
+        case VERTICAL_L:
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_BLUE));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_BLUE));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            break;
+        case VERTICAL_SR:
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            break;
+        case HORIZONTAL_L:
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_BLUE));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_BLUE));
+            break;
+        case HORIZONTAL_SR:
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            SDL_FillRect(win_surface, &(intersection_rects[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
+            break;
+    }
 }
 
 void poll_for_exit()
