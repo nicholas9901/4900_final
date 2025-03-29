@@ -11,7 +11,8 @@ void init_vehicle(
     intersection_T* intersection,
     instructions_T* instructions, 
     vehicle_priority_T priority,
-    int speed)
+    int speed,
+    char id)
 {
     direction_T corresponding_direction = determine_connection(
         instructions->list[instructions->current]);
@@ -22,11 +23,12 @@ void init_vehicle(
         intersection->endpoints[corresponding_direction].y);
     
     vehicle->intersection = intersection;
-    vehicle->instructions = instructions;
+    vehicle->instructions = *instructions;
     vehicle->priority     = priority;
     vehicle->turning      = true;
     vehicle->stopping     = true;
     vehicle->speed        = speed;
+    vehicle->id           = id;
 }
 
 /* 
@@ -36,10 +38,10 @@ Move Vehicle:
 void move(vehicle_T* vehicle)
 {
     int difference = 0;
-    switch (vehicle->instructions->list[vehicle->instructions->current]) {
+    switch (vehicle->instructions.list[vehicle->instructions.current]) {
         case NORTH:
             if (vehicle->turning) {
-                switch (vehicle->instructions->list[vehicle->instructions->next]) {
+                switch (vehicle->instructions.list[vehicle->instructions.next]) {
                     case EAST:
                         if (vehicle->stopping) {
                             difference = vehicle->location.y -
@@ -63,7 +65,7 @@ void move(vehicle_T* vehicle)
                             vehicle->location.y = 
                                 vehicle->intersection->turning_points[NORTH];
 
-                            next_instruction(vehicle->instructions);   
+                            next_instruction(&(vehicle->instructions));   
                             vehicle->turning = false; 
                             return;                            
                         }
@@ -91,7 +93,7 @@ void move(vehicle_T* vehicle)
                             vehicle->location.y = 
                                 vehicle->intersection->turning_points[NORTH] - LANE_OFFSET;
 
-                            next_instruction(vehicle->instructions);   
+                            next_instruction(&(vehicle->instructions));   
                             vehicle->turning = false; 
                             return;
                         }
@@ -117,7 +119,7 @@ void move(vehicle_T* vehicle)
             break;
         case EAST:
             if (vehicle->turning) {
-                switch (vehicle->instructions->list[vehicle->instructions->next]) {
+                switch (vehicle->instructions.list[vehicle->instructions.next]) {
                     case NORTH:
                         if (vehicle->stopping) {
                             difference = vehicle->location.x -
@@ -142,7 +144,7 @@ void move(vehicle_T* vehicle)
                             vehicle->location.x = 
                                 vehicle->intersection->turning_points[EAST] + LANE_OFFSET;
                 
-                            next_instruction(vehicle->instructions);   
+                            next_instruction(&(vehicle->instructions));   
                             vehicle->turning = false;
                             return;  
                         }
@@ -171,7 +173,7 @@ void move(vehicle_T* vehicle)
                                 vehicle->intersection->turning_points[EAST];   
 
                             vehicle->intersection = vehicle->intersection->connections[EAST];
-                            next_instruction(vehicle->instructions);  
+                            next_instruction(&(vehicle->instructions));  
                             vehicle->turning = false;
                             return;
                         }
@@ -197,7 +199,7 @@ void move(vehicle_T* vehicle)
             break;
         case SOUTH:
             if (vehicle->turning) {
-                switch (vehicle->instructions->list[vehicle->instructions->next]) {
+                switch (vehicle->instructions.list[vehicle->instructions.next]) {
                     case EAST:
                         if (vehicle->stopping) {
                             difference = vehicle->location.y -
@@ -222,7 +224,7 @@ void move(vehicle_T* vehicle)
                             vehicle->location.y = 
                                 vehicle->intersection->turning_points[SOUTH] + LANE_OFFSET;
                 
-                            next_instruction(vehicle->instructions);   
+                            next_instruction(&(vehicle->instructions));   
                             vehicle->turning = false; 
                             return;
                         }
@@ -250,7 +252,7 @@ void move(vehicle_T* vehicle)
                             vehicle->location.y = 
                                 vehicle->intersection->turning_points[SOUTH];
                 
-                            next_instruction(vehicle->instructions);   
+                            next_instruction(&(vehicle->instructions));   
                             vehicle->turning = false;
                             return;
                         }
@@ -276,7 +278,7 @@ void move(vehicle_T* vehicle)
             break;
         case WEST:
             if (vehicle->turning) {
-                switch (vehicle->instructions->list[vehicle->instructions->next]) {
+                switch (vehicle->instructions.list[vehicle->instructions.next]) {
                     case NORTH:
                         if (vehicle->stopping) {
                             difference = vehicle->location.x -
@@ -300,7 +302,7 @@ void move(vehicle_T* vehicle)
                             vehicle->location.x = 
                                 vehicle->intersection->turning_points[WEST];
                 
-                            next_instruction(vehicle->instructions);   
+                            next_instruction(&(vehicle->instructions));   
                             vehicle->turning = false;
                             return; 
                         }
@@ -329,7 +331,7 @@ void move(vehicle_T* vehicle)
                             vehicle->location.x = 
                                 vehicle->intersection->turning_points[WEST] - LANE_OFFSET;
 
-                            next_instruction(vehicle->instructions);   
+                            next_instruction(&(vehicle->instructions));   
                             vehicle->turning = false; 
                             return;
                         }
@@ -354,6 +356,11 @@ void move(vehicle_T* vehicle)
             vehicle->location.x -= vehicle->speed;
             break;
         default:
-            direction_error(vehicle->instructions->list[vehicle->instructions->current]);
+            direction_error(vehicle->instructions.list[vehicle->instructions.current]);
     }
+}
+
+bool emergency_arrived(vehicle_T* vehicle)
+{
+    return true;
 }

@@ -3,11 +3,11 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-/* struct constants */
+/* Struct constants */
 #define NUM_INTERSECTIONS  2
 #define NUM_VEHICLES       1
 
-/* intersection constants */
+/* Intersection constants */
 #define MAX_CONNECTIONS   4
 #define INTERSECTION_SIZE 50
 #define DEFAULT_LENGTH    50
@@ -17,11 +17,12 @@
 #define PHASE_TIMER       50
 #define NUM_PHASES        4
 
-/* vehicle constants */
-#define DEFAULT_SPEED 2
-#define CAR_SIZE      (INTERSECTION_SIZE / 2)
+/* Vehicle constants */
+#define DEFAULT_SPEED   2
+#define EMERGENCY_SPEED 3
+#define CAR_SIZE        (INTERSECTION_SIZE / 2)
 
-/* location constants */
+/* Location constants */
 #define MAX_X 1200
 #define MAX_Y 1200
 #define INIT_INTERSECTION_START_X ((MAX_X / 2) - INTERSECTION_SIZE)
@@ -29,7 +30,7 @@
 
 #define SLEEP_INTERVAL 30000
 
-/* enumerated types */
+/* Enumerated types */
 typedef enum {NORTH, EAST, SOUTH, WEST} direction_T;
 typedef enum {PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW} vehicle_priority_T;
 
@@ -47,13 +48,13 @@ typedef enum {
     HORIZONTAL_SR
 } phase_T;
 
-/* vector */
+/* Vector */
 typedef struct {
     int x;
     int y;
 } vector_T;
 
-/* vehicle_instructions */
+/* Vehicle Instructions */
 typedef struct {
     /* 
     list: 
@@ -67,7 +68,7 @@ typedef struct {
 } instructions_T;
 
 /* 
-intersection 
+Intersection 
     Data in `connections` and `lengths` stored in the same order as the
     `direction` enum, so `connections[0]` is `NORTH`, `connections[1]` is
     `EAST`, etc.
@@ -87,13 +88,14 @@ typedef struct intersection {
     char id;
 } intersection_T;
 
-/* vehicle */
+/* Vehicle */
 typedef struct {
     vector_T location;
     intersection_T* intersection;
-    instructions_T* instructions;
+    instructions_T instructions;
     vehicle_priority_T priority;
     bool turning;
     bool stopping;
     int speed;
+    char id;
 } vehicle_T;

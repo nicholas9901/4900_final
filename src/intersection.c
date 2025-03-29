@@ -131,7 +131,6 @@ void phase_timer(intersection_T* intersection)
         intersection->timer = 0;
 #if GUI
         draw_phase_change(intersection);
-        printf("change %d\n", intersection->phase);
 #endif
     }
     else { 

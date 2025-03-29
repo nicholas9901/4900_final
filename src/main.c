@@ -14,14 +14,15 @@ int main(int argc, char** argv) {
     /* Initializing the structures */
     intersection_T intersections[NUM_INTERSECTIONS];
     vehicle_T      vehicles[NUM_VEHICLES];
+    vehicle_T      emergency_vehicle;
     direction_T    list_instructions[2];
     list_instructions[0] = WEST;
     list_instructions[1] = SOUTH;
 
-    instructions_T vi1;
-    init_instructions(&vi1, list_instructions, 2);
+    instructions_T instructions_1;
+    init_instructions(&instructions_1, list_instructions, 2);
     
-    int rl1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
+    int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
 
     init_intersection(
         &(intersections[0]), 
@@ -29,7 +30,7 @@ int main(int argc, char** argv) {
         &(intersections[1]), 
         &(intersections[0]), 
         &(intersections[1]),
-        rl1,
+        road_lengths_1,
         0);
 
     init_intersection(
@@ -38,7 +39,7 @@ int main(int argc, char** argv) {
         &(intersections[0]), 
         &(intersections[1]), 
         &(intersections[0]), 
-        rl1,
+        road_lengths_1,
         1);
 
     /* Intersection coordinate generation */
@@ -48,22 +49,34 @@ int main(int argc, char** argv) {
         INIT_INTERSECTION_START_Y);
 
     init_intersection_construction(&(intersections[0]));
+    
+    /* Emergency vehicle */
+    init_vehicle(
+        &emergency_vehicle,
+        &(intersections[0]),
+        &instructions_1,        
+        PRIORITY_HIGH,
+        EMERGENCY_SPEED,
+        -1);
 
+    /* Traffic vehicles */
     init_vehicle(
         &(vehicles[0]),
         &(intersections[0]),
-        &vi1,        
+        &instructions_1,        
         PRIORITY_LOW,
-        DEFAULT_SPEED);
+        DEFAULT_SPEED,
+        0);
 
     #if GUI
     print_vehicle(&(vehicles[0]), 1);
     print_intersection(&(intersections[0]), 1);
     print_intersection(&(intersections[1]), 2);
-    init_gui(vehicles, intersections);
+    init_gui(vehicles, &emergency_vehicle, intersections);
     #endif
     /* Main program loop */
-    while(1) {
+    while(emergency_arrived(&emergency_vehicle)) {
+        move(&emergency_vehicle);
         for (int i = 0; i < NUM_VEHICLES; i++) {
             move(&(vehicles[i]));
         }
@@ -73,7 +86,7 @@ int main(int argc, char** argv) {
         }
         #if GUI
         poll_for_exit(); /* Listen for an exit event before updating */
-        update_gui(vehicles, intersections);
+        update_gui(vehicles, &emergency_vehicle, intersections);
         #endif
         usleep(SLEEP_INTERVAL);
     }

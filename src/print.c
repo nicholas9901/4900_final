@@ -47,7 +47,7 @@ void print_vehicle(vehicle_T* vehicle, int id)
     printf("\n  Speed: %d\n", vehicle->speed);
     printf("  Turning: %d\n", vehicle->turning);
     printf(" Stopping: %d\n", vehicle->stopping);
-    print_instructions(vehicle->instructions);
+    print_instructions(&(vehicle->instructions));
 }
 
 void print_intersection(intersection_T* intersection, int id)

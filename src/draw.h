@@ -25,16 +25,22 @@
 extern char run_path[PATH_SIZE];
 
 typedef struct {
+    SDL_Rect pos;
+    SDL_Texture* texture;
+} vehicle_SDL_T;
+
+typedef struct {
     SDL_Rect 
         divs[MAX_CONNECTIONS],
         stops[MAX_CONNECTIONS];
-} intersection_rects_T;
+} intersection_SDL_T;
 
-void init_gui();
-void update_gui(vehicle_T*, intersection_T*);
+void init_gui(vehicle_T*, vehicle_T*, intersection_T*);
+void update_gui(vehicle_T*, vehicle_T*, intersection_T*);
 void exit_gui();
-void draw_vehicle(vehicle_T*);
-void draw_intersection(intersection_T*);
+void init_draw_vehicle(vehicle_T*);
+void init_draw_emergency_vehicle(vehicle_T*);
+void init_draw_intersection(intersection_T*);
 void draw_phase_change(intersection_T*);
 void move_horizontal(SDL_Texture*, SDL_Rect);
 void move_vertical(SDL_Texture*, SDL_Rect);

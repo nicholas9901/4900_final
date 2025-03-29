@@ -31,10 +31,11 @@ void init_vehicle(
     intersection_T*,
     instructions_T*, 
     vehicle_priority_T,
-    int);
+    int,
+    char);
 
 void move(vehicle_T*);
-bool right_of_way(vehicle_T*);
+bool emergency_arrived(vehicle_T*);
 
 /* intersection.c */
 void init_intersection(
