@@ -5,7 +5,7 @@ SDL_Surface* win_surface;
 SDL_Renderer* renderer; //apply transformations to images
 SDL_Event event;
 SDL_Texture* car_texture;
-vehicle_SDL_T vehicle_icons[NUM_VEHICLES];
+vehicle_SDL_T vehicle_icons[NUM_VEHICLES_TRAFFIC];
 vehicle_SDL_T emergency_vehicle_icon;
 intersection_SDL_T intersection_icons[NUM_INTERSECTIONS];
 
@@ -62,7 +62,7 @@ void init_gui(
 
     init_draw_emergency_vehicle(emergency_vehicle);
 
-    for (int i = 0; i < NUM_VEHICLES; i++) {
+    for (int i = 0; i < NUM_VEHICLES_TRAFFIC; i++) {
         init_draw_vehicle(&(vehicles[i]));
     }
 
@@ -83,7 +83,7 @@ void update_gui(
     emergency_vehicle_icon.pos.y = emergency_vehicle->location.y;
     SDL_RenderCopyEx(renderer, emergency_vehicle_icon.texture, NULL, &(emergency_vehicle_icon.pos), 0.0, NULL, SDL_FLIP_NONE);
 
-    for (int i = 0; i < NUM_VEHICLES; i++) {
+    for (int i = 0; i < NUM_VEHICLES_TRAFFIC; i++) {
         SDL_RenderFillRect(renderer, &(vehicle_icons[i].pos));
         vehicle_icons[i].pos.x = vehicles[i].location.x;
         vehicle_icons[i].pos.y = vehicles[i].location.y;
@@ -105,8 +105,8 @@ void exit_gui()
 void init_draw_vehicle(vehicle_T* vehicle)
 {
     vehicle_icons[vehicle->id].texture = car_texture;
-    vehicle_icons[vehicle->id].pos.w   = CAR_SIZE;
-    vehicle_icons[vehicle->id].pos.h   = CAR_SIZE;
+    vehicle_icons[vehicle->id].pos.w   = VEHICLE_SIZE;
+    vehicle_icons[vehicle->id].pos.h   = VEHICLE_SIZE;
     vehicle_icons[vehicle->id].pos.x   = vehicle->location.x;
     vehicle_icons[vehicle->id].pos.y   = vehicle->location.y;
     SDL_RenderCopyEx(renderer, vehicle_icons[vehicle->id].texture, NULL, &(vehicle_icons[vehicle->id].pos), 0.0, NULL, SDL_FLIP_NONE);
@@ -116,8 +116,8 @@ void init_draw_vehicle(vehicle_T* vehicle)
 void init_draw_emergency_vehicle(vehicle_T* vehicle)
 {
     emergency_vehicle_icon.texture = car_texture;
-    emergency_vehicle_icon.pos.w   = CAR_SIZE;
-    emergency_vehicle_icon.pos.h   = CAR_SIZE;
+    emergency_vehicle_icon.pos.w   = VEHICLE_SIZE;
+    emergency_vehicle_icon.pos.h   = VEHICLE_SIZE;
     emergency_vehicle_icon.pos.x   = vehicle->location.x;
     emergency_vehicle_icon.pos.y   = vehicle->location.y;
     SDL_RenderCopyEx(renderer, emergency_vehicle_icon.texture, NULL, &(emergency_vehicle_icon.pos), 0.0, NULL, SDL_FLIP_NONE);

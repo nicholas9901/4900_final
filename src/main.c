@@ -1,6 +1,9 @@
 #include "prototypes.h"
+
+#if GUI
 #include "draw.h"
 #include "print.h"
+#endif
 
 int main(int argc, char** argv) {
     
@@ -13,11 +16,12 @@ int main(int argc, char** argv) {
 
     /* Initializing the structures */
     intersection_T intersections[NUM_INTERSECTIONS];
-    vehicle_T      vehicles[NUM_VEHICLES];
+    vehicle_T      vehicles[NUM_VEHICLES_TRAFFIC];
     vehicle_T      emergency_vehicle;
+    vehicle_list_T active_vehicles;
     direction_T    list_instructions[2];
-    list_instructions[0] = WEST;
-    list_instructions[1] = SOUTH;
+    list_instructions[0] = SOUTH;
+    list_instructions[1] = WEST;
 
     instructions_T instructions_1;
     init_instructions(&instructions_1, list_instructions, 2);
@@ -67,22 +71,38 @@ int main(int argc, char** argv) {
         PRIORITY_LOW,
         DEFAULT_SPEED,
         0);
+    
+    /* 
+    Initially all vehicles are in the active state, put them all in. 
+    Whether a vehicle is active or not determines if it is moving or waiting
+    in queue at a red light.
+    */
+    init_active_vehicles(&active_vehicles, &emergency_vehicle, vehicles);
 
     #if GUI
-    print_vehicle(&(vehicles[0]), 1);
-    print_intersection(&(intersections[0]), 1);
-    print_intersection(&(intersections[1]), 2);
+    // print_vehicle(&(vehicles[0]), 1);
+    // print_intersection(&(intersections[0]), 1);
+    // print_intersection(&(intersections[1]), 2);
     init_gui(vehicles, &emergency_vehicle, intersections);
     #endif
+    
     /* Main program loop */
     while(emergency_arrived(&emergency_vehicle)) {
-        move(&emergency_vehicle);
-        for (int i = 0; i < NUM_VEHICLES; i++) {
-            move(&(vehicles[i]));
+        for (int i = 0; i < active_vehicles.num; i++) {
+            if (!move_vehicle(active_vehicles.vehicles[i])) {
+                enqueue_vehicle(
+                    &active_vehicles, 
+                    active_vehicles.vehicles[i], 
+                    i);
+            }
         }
 
         for (int i = 0; i < NUM_INTERSECTIONS; i++) {
-            phase_timer(&(intersections[i]));
+            if (phase_timer(&active_vehicles, &(intersections[i]))) {
+                #if GUI
+                print_intersection(&(intersections[i]), i);
+                #endif
+            }
         }
         #if GUI
         poll_for_exit(); /* Listen for an exit event before updating */

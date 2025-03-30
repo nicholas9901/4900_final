@@ -73,4 +73,16 @@ void print_intersection(intersection_T* intersection, int id)
         intersection->turning_points[SOUTH],
         intersection->turning_points[WEST]
     );
+
+    /* Queued Vehicles */
+    printf("  Queued Vehicles:\n");
+    for (int direction = 0; direction < NUM_DIRECTIONS; direction++) {
+        printf("    ");
+        print_direction(direction);
+        printf("[%d]: ", intersection->queued_vehicles[direction].num);
+        for (int i = 0; i < intersection->queued_vehicles[direction].num; i++) {
+            printf("%d, ", intersection->queued_vehicles[direction].vehicles[i]->id);
+        }
+        printf("\n");
+    }
 }

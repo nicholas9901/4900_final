@@ -34,8 +34,11 @@ void init_vehicle(
     int,
     char);
 
-void move(vehicle_T*);
+void init_active_vehicles(vehicle_list_T*, vehicle_T*, vehicle_T*);
+bool move_vehicle(vehicle_T*);
+void enqueue_vehicle(vehicle_list_T*, vehicle_T*, int);
 bool emergency_arrived(vehicle_T*);
+
 
 /* intersection.c */
 void init_intersection(
@@ -48,6 +51,12 @@ void init_intersection(
     char);
 
 void init_intersection_construction(intersection_T*);
-void phase_timer(intersection_T*);
+void transfer_vehicles(vehicle_list_T*, vehicle_list_T*);
+void dequeue_vehicles(vehicle_list_T*, intersection_T*);
+
+
+#if GUI
+bool phase_timer(vehicle_list_T*, intersection_T*);
+#endif
 
 #endif /* PROTOTYPES_H */

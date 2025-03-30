@@ -30,6 +30,7 @@ void init_intersection(
     
     for (int i = 0; i < MAX_CONNECTIONS; i++) {
         intersection->lengths[i] = lengths[i];
+        intersection->queued_vehicles[i].num = 0;
     }    
 }
 
@@ -76,20 +77,16 @@ void init_intersection_construction(intersection_T* intersection)
         LANE_OFFSET;
     
     /* Stopping points */
-    intersection->stopping_points[NORTH].main = 
-        intersection->stopping_points[NORTH].current =
+    intersection->stopping_points[NORTH] = 
         intersection->location.y + INTERSECTION_SIZE + DIV_WIDTH;
     
-    intersection->stopping_points[EAST].main = 
-        intersection->stopping_points[EAST].current =
-        intersection->location.x - DIV_WIDTH - CAR_SIZE;
+    intersection->stopping_points[EAST] = 
+        intersection->location.x - DIV_WIDTH - VEHICLE_SIZE;
 
-    intersection->stopping_points[SOUTH].main = 
-        intersection->stopping_points[SOUTH].current =
-        intersection->location.y - DIV_WIDTH - CAR_SIZE;
+    intersection->stopping_points[SOUTH] = 
+        intersection->location.y - DIV_WIDTH - VEHICLE_SIZE;
 
-    intersection->stopping_points[WEST].main = 
-        intersection->stopping_points[WEST].current =
+    intersection->stopping_points[WEST] = 
         intersection->location.x + INTERSECTION_SIZE + DIV_WIDTH;
 
     intersection->constructed = true;
@@ -122,18 +119,61 @@ void init_intersection_construction(intersection_T* intersection)
 }
 
 /*
-Sample phase algorithm for testing
+Transfer Vehicles
+    Helper function for dequeue_vehicles
 */
-void phase_timer(intersection_T* intersection)
+void transfer_vehicles(vehicle_list_T* list_to, vehicle_list_T* list_from)
+{
+    while (list_from->num > 0) {
+        list_to->vehicles[(list_to->num)++] = list_from->vehicles[--(list_from->num)];
+    }
+}
+
+/*
+Dequeue Vehicles
+    Given an intersection, and its phase takes all the vehicles in the 
+    corresponding direction queues and puts them back into the list of active 
+    vehicles. Also resets the intersection stopping point for directions 
+    affected.
+*/
+void dequeue_vehicles(
+    vehicle_list_T* active_vehicles, 
+    intersection_T* intersection)
+{
+        transfer_vehicles(
+            active_vehicles,
+            &(intersection->queued_vehicles[NORTH]));
+
+        transfer_vehicles(
+            active_vehicles,
+            &(intersection->queued_vehicles[SOUTH]));
+
+        transfer_vehicles(
+            active_vehicles,
+            &(intersection->queued_vehicles[EAST]));
+
+        transfer_vehicles(
+            active_vehicles,
+            &(intersection->queued_vehicles[WEST]));
+}
+
+/*
+Phase Timer
+    Sample phase changing algorithm for testing
+*/
+#if GUI
+bool phase_timer(vehicle_list_T* active_vehicles, intersection_T* intersection)
 {
     if (intersection->timer >= PHASE_TIMER ) {
         intersection->phase = (intersection->phase + 1) % NUM_PHASES;
         intersection->timer = 0;
-#if GUI
+        dequeue_vehicles(active_vehicles, intersection);
         draw_phase_change(intersection);
-#endif
+        return true;
     }
     else { 
         intersection->timer++; 
+        return false;
     }
 }
+#endif
