@@ -50,30 +50,11 @@ void print_vehicle(vehicle_T* vehicle, int id)
     print_instructions(&(vehicle->instructions));
 }
 
-void print_intersection(intersection_T* intersection, int id)
+void print_intersection(intersection_T* intersection)
 {
-    printf("Intersection %d:\n  (x,y): ", id);
+    printf("Intersection %d:\n  (x,y): ", intersection->id);
     print_vector(&(intersection->location));
     
-    /* Endpoints */
-    printf("\n  Endpoints:\n    North: ");
-    print_vector(&(intersection->endpoints[NORTH]));
-    printf("\n    East: ");
-    print_vector(&(intersection->endpoints[EAST]));
-    printf("\n    South: ");
-    print_vector(&(intersection->endpoints[SOUTH]));
-    printf("\n    West: ");
-    print_vector(&(intersection->endpoints[WEST]));
-
-    /* Turning Points */
-    printf(
-        "\n  Turning Points:\n    North: %d\n    East: %d\n    South: %d\n    West: %d\n",
-        intersection->turning_points[NORTH],
-        intersection->turning_points[EAST],
-        intersection->turning_points[SOUTH],
-        intersection->turning_points[WEST]
-    );
-
     /* Queued Vehicles */
     printf("  Queued Vehicles:\n");
     for (int direction = 0; direction < NUM_DIRECTIONS; direction++) {

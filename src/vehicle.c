@@ -19,8 +19,8 @@ void init_vehicle(
 
     init_vector(
         &(vehicle->location), 
-        intersection->endpoints[corresponding_direction].x,
-        intersection->endpoints[corresponding_direction].y);
+        intersection->location.x,
+        intersection->end_points[corresponding_direction]);
     
     vehicle->intersection = intersection;
     vehicle->instructions = *instructions;
@@ -59,14 +59,37 @@ void enqueue_vehicle(
     vehicle_T* current_vehicle,
     int index)
 {
-    vehicle_list_T* current_list = current_vehicle->intersection->queued_vehicles;
+    direction_T current_direction = current_vehicle->instructions.list[current_vehicle->instructions.current]; 
+    vehicle_list_T* current_list = &(current_vehicle->intersection->queued_vehicles[current_direction]);
     active_vehicles->num--;
     for (int i = index; i < active_vehicles->num; i++) {
         active_vehicles->vehicles[i] = active_vehicles->vehicles[i + 1];
     }
-    current_list[current_vehicle->instructions.current].
-        vehicles[(current_list[current_vehicle->instructions.current].num)++] 
-        = current_vehicle;
+    current_list->vehicles[(current_list->num)++] = current_vehicle;
+}
+
+/*
+Get Phase
+    Helper function for move vehicle, gets the corresponding phase given a
+    current and next direction.
+*/
+phase_T get_phase(direction_T current, direction_T next)
+{
+    switch (current) {
+        case NORTH:
+            if (next == WEST) return VERTICAL_L;
+            return VERTICAL_SR;
+        case EAST:
+            if (next == NORTH) return HORIZONTAL_L;
+            return HORIZONTAL_SR; 
+        case SOUTH:
+            if (next == EAST) return VERTICAL_L;
+            return VERTICAL_SR;
+        case WEST:
+            if (next == SOUTH) return HORIZONTAL_L;
+            return HORIZONTAL_SR;
+    }
+    exit(1);
 }
 
 /* 
@@ -75,335 +98,87 @@ Move Vehicle:
 */
 bool move_vehicle(vehicle_T* vehicle)
 {
-    int difference = 0;
-    switch (vehicle->instructions.list[vehicle->instructions.current]) {
-        case NORTH:
-            if (vehicle->turning) {
-                switch (vehicle->instructions.list[vehicle->instructions.next]) {
-                    case EAST:
-                        if (vehicle->stopping) {
-                            difference = vehicle->location.y -
-                                vehicle->intersection->stopping_points[NORTH];
+    static const int direction_matrix[4][2] = {
+        {0, -1}, // NORTH
+        {1,  0}, // EAST
+        {0,  1}, // SOUTH
+        {-1, 0}  // WEST
+    };
 
-                            if (difference < 0 ) {
-                                vehicle->stopping = false;
-                            }
-                            else if (vehicle->intersection->phase   != VERTICAL_SR 
-                                     && difference - vehicle->speed <= 0) 
-                            {
-                                vehicle->location.y = 
-                                    vehicle->intersection->stopping_points[NORTH];
+    int direction      = vehicle->instructions.list[vehicle->instructions.current];
+    int next_direction = vehicle->instructions.list[vehicle->instructions.next];
+    int movement_x     = direction_matrix[direction][0] * vehicle->speed;
+    int movement_y     = direction_matrix[direction][1] * vehicle->speed;
+    char orientation   = direction % 2 == 1; /* True for horizontal, false for vertical */
 
-                                return false;
-                            }
+    if (vehicle->turning) {
+        int stopping_point = vehicle->intersection->stopping_points[direction];
+        int difference     = orientation ? 
+            (vehicle->location.x - stopping_point) * direction_matrix[direction][0] :
+            (vehicle->location.y - stopping_point) * direction_matrix[direction][1];
 
-                        }         
-                        else if (vehicle->location.y - vehicle->speed <= 
-                                 vehicle->intersection->turning_points[NORTH])
-                        {
-                            vehicle->location.y = 
-                                vehicle->intersection->turning_points[NORTH];
+        phase_T correct_phase = get_phase(direction, next_direction);
 
-                            next_instruction(&(vehicle->instructions));   
-                            vehicle->turning = false; 
-                            return true;                            
-                        }
-                        break;
-                    case WEST:
-                        if (vehicle->stopping) {
-                            difference = vehicle->location.y -
-                                vehicle->intersection->stopping_points[NORTH];
-
-                            if (difference < 0 ) {
-                                vehicle->stopping = false;
-                            }
-                            else if (vehicle->intersection->phase   != VERTICAL_L
-                                     && difference - vehicle->speed <= 0) 
-                            {
-                                vehicle->location.y = 
-                                    vehicle->intersection->stopping_points[NORTH];
-
-                                return false;
-                            }
-                        }
-                        else if (vehicle->location.y - vehicle->speed <= 
-                            vehicle->intersection->turning_points[NORTH] - 
-                            LANE_OFFSET) 
-                        {
-                            vehicle->location.y = 
-                                vehicle->intersection->turning_points[NORTH] - LANE_OFFSET;
-
-                            next_instruction(&(vehicle->instructions));   
-                            vehicle->turning = false; 
-                            return true;
-                        }
-                        break;
-                    default:
-                        vehicle->turning = false;
-                        break;
-                }
+        if (vehicle->stopping) { /* Determine if the vehicle should stop */
+            if (difference > 0 ) {
+                vehicle->stopping = false;
             }
-            else if ((difference = vehicle->location.y - vehicle->speed - 
-                 vehicle->intersection->endpoints[NORTH].y) <= 0) 
+            else if (vehicle->intersection->phase   != correct_phase
+                     && difference + vehicle->speed >= 0) 
             {
-                vehicle->location.y = 
-                    vehicle->intersection->connections[NORTH]->endpoints[determine_connection(NORTH)].y 
-                    + difference;
-        
-                vehicle->intersection = vehicle->intersection->connections[NORTH];
-                vehicle->turning  = true;
-                vehicle->stopping = true;
-            }
-            /* North movement */
-            vehicle->location.y -= vehicle->speed;
-            break;
-        case EAST:
-            if (vehicle->turning) {
-                switch (vehicle->instructions.list[vehicle->instructions.next]) {
-                    case NORTH:
-                        if (vehicle->stopping) {
-                            difference = vehicle->location.x -
-                                vehicle->intersection->stopping_points[EAST];
-
-                            if (difference > 0 ) 
-                            {
-                                vehicle->stopping = false;
-                            }
-                            else if (vehicle->intersection->phase  != HORIZONTAL_L
-                                     && difference + vehicle->speed >= 0) 
-                            {
-                                vehicle->location.x = 
-                                    vehicle->intersection->stopping_points[EAST];
-
-                                return false;
-                            }
-                        }
-                        else if (vehicle->location.x + vehicle->speed >= 
-                            vehicle->intersection->turning_points[EAST] + 
-                            LANE_OFFSET)
-                        {
-                            vehicle->location.x = 
-                                vehicle->intersection->turning_points[EAST] + LANE_OFFSET;
-                
-                            next_instruction(&(vehicle->instructions));   
-                            vehicle->turning = false;
-                            return true;  
-                        }
-                        break;
-                    case SOUTH:
-                        if (vehicle->stopping) {
-                            difference = vehicle->location.x -
-                                vehicle->intersection->stopping_points[EAST];
-
-                            if (difference > 0 ) 
-                            {
-                                vehicle->stopping = false;
-                            }
-                            else if (vehicle->intersection->phase  != HORIZONTAL_SR
-                                    && difference + vehicle->speed >= 0) 
-                            {
-                                vehicle->location.x = 
-                                    vehicle->intersection->stopping_points[EAST];
-
-                                return false;
-                            }
-                        }
-                        else if (vehicle->location.x + vehicle->speed >= 
-                            vehicle->intersection->turning_points[EAST]) 
-                        {
-                            vehicle->location.x = 
-                                vehicle->intersection->turning_points[EAST];   
-
-                            vehicle->intersection = vehicle->intersection->connections[EAST];
-                            next_instruction(&(vehicle->instructions));  
-                            vehicle->turning = false;
-                            return true;
-                        }
-                        break;
-                    default:
-                        vehicle->turning = 0;
-                        break;
+                if (orientation) {
+                    vehicle->location.x = vehicle->intersection->stopping_points[direction];
                 }
-            }
-            else if((difference = vehicle->location.x + vehicle->speed - 
-                vehicle->intersection->endpoints[EAST].x) >= 0) 
-            {
-                vehicle->location.x = 
-                    vehicle->intersection->connections[EAST]->endpoints[determine_connection(EAST)].x 
-                    + difference;
-        
-                vehicle->intersection = vehicle->intersection->connections[EAST];
-                vehicle->turning  = true;
-                vehicle->stopping = true;
-            }
-            /* East movement */
-            vehicle->location.x += vehicle->speed;
-            break;
-        case SOUTH:
-            if (vehicle->turning) {
-                switch (vehicle->instructions.list[vehicle->instructions.next]) {
-                    case EAST:
-                        if (vehicle->stopping) {
-                            difference = vehicle->location.y -
-                                vehicle->intersection->stopping_points[SOUTH];
-
-                            if (difference > 0 ) {
-                                vehicle->stopping = false;
-                            }
-                            else if (vehicle->intersection->phase  != VERTICAL_L
-                                    && difference + vehicle->speed >= 0) 
-                            {
-                                vehicle->location.y = 
-                                    vehicle->intersection->stopping_points[SOUTH];
-
-                                return false;
-                            }
-
-                        }     
-                        else if (vehicle->location.y + vehicle->speed >= 
-                            vehicle->intersection->turning_points[SOUTH] + 
-                            LANE_OFFSET)
-                        {
-                            vehicle->location.y = 
-                                vehicle->intersection->turning_points[SOUTH] + LANE_OFFSET;
-                
-                            next_instruction(&(vehicle->instructions));   
-                            vehicle->turning = false; 
-                            return true;
-                        }
-                        break;
-                    case WEST:
-                    if (vehicle->stopping) {
-                            difference = vehicle->location.y -
-                                vehicle->intersection->stopping_points[SOUTH];
-
-                            if (difference > 0 ) {
-                                vehicle->stopping = false;
-                            }
-                            else if (vehicle->intersection->phase  != VERTICAL_SR
-                                    && difference + vehicle->speed >= 0) 
-                            {
-                                vehicle->location.y = 
-                                    vehicle->intersection->stopping_points[SOUTH];
-
-                                return false;
-                            }
-
-                        }     
-                        else if (vehicle->location.y + vehicle->speed >= 
-                            vehicle->intersection->turning_points[SOUTH])
-                        {
-                            vehicle->location.y = 
-                                vehicle->intersection->turning_points[SOUTH];
-                
-                            next_instruction(&(vehicle->instructions));   
-                            vehicle->turning = false;
-                            return true;
-                        }
-                        break;
-                    default:
-                        vehicle->turning = 0;
-                        break;
+                else {
+                    vehicle->location.y = vehicle->intersection->stopping_points[direction];
                 }
+                return false;
             }
-            else if ((difference = vehicle->location.y + vehicle->speed - 
-                      vehicle->intersection->endpoints[SOUTH].y) >= 0) 
-            {
-                vehicle->location.y = 
-                    vehicle->intersection->connections[SOUTH]->endpoints[determine_connection(SOUTH)].y 
-                    + difference;
-        
-                vehicle->intersection = vehicle->intersection->connections[SOUTH];
-                vehicle->turning  = true;
-                vehicle->stopping = true;
-            }
-            /* South movement */
-            vehicle->location.y += vehicle->speed;
-            break;
-        case WEST:
-            if (vehicle->turning) {
-                switch (vehicle->instructions.list[vehicle->instructions.next]) {
-                    case NORTH:
-                        if (vehicle->stopping) {
-                            difference = vehicle->location.x -
-                                vehicle->intersection->stopping_points[WEST];
-
-                            if (difference < 0 ) 
-                            {
-                                vehicle->stopping = false;
-                            }
-                            else if (vehicle->intersection->phase  != HORIZONTAL_SR
-                                    && difference - vehicle->speed <= 0) 
-                            {
-                                vehicle->location.x = 
-                                    vehicle->intersection->stopping_points[WEST];
-                                
-                                return false;
-                            }
-                        }
-                        else if (vehicle->location.x - vehicle->speed <= 
-                            vehicle->intersection->turning_points[WEST])
-                        {
-                            vehicle->location.x = 
-                                vehicle->intersection->turning_points[WEST];
-                
-                            next_instruction(&(vehicle->instructions));   
-                            vehicle->turning = false;
-                            return true; 
-                        }
-                        break;
-                    case SOUTH:
-                        if (vehicle->stopping) {
-                            difference = vehicle->location.x -
-                                vehicle->intersection->stopping_points[WEST];
-
-                            if (difference < 0 ) 
-                            {
-                                vehicle->stopping = false;
-                            }
-                            else if (vehicle->intersection->phase  != HORIZONTAL_L
-                                    && difference - vehicle->speed <= 0) 
-                            {
-                                vehicle->location.x = 
-                                    vehicle->intersection->stopping_points[WEST];
-
-                                return false;
-                            }
-                        }
-                        else if (vehicle->location.x - vehicle->speed <= 
-                            vehicle->intersection->turning_points[WEST] - 
-                            LANE_OFFSET)
-                        {
-                            vehicle->location.x = 
-                                vehicle->intersection->turning_points[WEST] - LANE_OFFSET;
-
-                            next_instruction(&(vehicle->instructions));   
-                            vehicle->turning = false; 
-                            return true;
-                        }
-                        break;
-                    default:
-                        vehicle->turning = 0;
-                        break;
+        }
+        else { /* Determine if the vehicle should turn and change directions */ 
+            int turning_point = correct_phase % 2 == 0 ?
+                vehicle->intersection->turning_points_left[direction] : /* Left turns */
+                vehicle->intersection->turning_points_right[direction]; /* Right turns */
+            int difference = orientation ? 
+                (vehicle->location.x - turning_point) * direction_matrix[direction][0] :
+                (vehicle->location.y - turning_point) * direction_matrix[direction][1];
+            if (difference >= 0) {
+                if (direction % 2 == 1 /* Horizontal */) {
+                    vehicle->location.x = turning_point;
                 }
+                else /* Vertical */ {
+                    vehicle->location.y = turning_point;
+                }
+                next_instruction(&(vehicle->instructions));   
+                movement_x = direction_matrix[next_direction][0] * vehicle->speed;
+                movement_y = direction_matrix[next_direction][1] * vehicle->speed;
+                vehicle->turning = false; 
             }
-            else if ((difference = vehicle->location.x - vehicle->speed - 
-                      vehicle->intersection->endpoints[WEST].x) <= 0) 
-            {
-                vehicle->location.x = 
-                    vehicle->intersection->connections[WEST]->endpoints[determine_connection(WEST)].x 
-                    + difference;
-        
-                vehicle->intersection = vehicle->intersection->connections[WEST];
-                vehicle->turning  = true;
-                vehicle->stopping = true;
-            }
-            /* West movement */
-            vehicle->location.x -= vehicle->speed;
-            break;
-        default:
-            direction_error(vehicle->instructions.list[vehicle->instructions.current]);
+        } 
     }
+    /* Determine if the vehicle should transition to the next intersection */
+    int end_point  = vehicle->intersection->end_points[direction];
+    int difference = orientation ? 
+        (vehicle->location.x - end_point) * direction_matrix[direction][0] :
+        (vehicle->location.y - end_point) * direction_matrix[direction][1];
+
+    if (difference >= 0) {
+        direction_T connection = determine_connection(direction);
+        if (direction % 2 == 1 /* Horizontal */) {
+            vehicle->location.x =
+                vehicle->intersection->connections[direction]->end_points[connection];                    
+        }
+        else /* Vertical */ {
+            vehicle->location.y = 
+                vehicle->intersection->connections[direction]->end_points[connection];
+        }
+        vehicle->intersection = vehicle->intersection->connections[connection];
+        vehicle->turning  = true;
+        vehicle->stopping = true;
+    }
+
+    vehicle->location.x += movement_x;
+    vehicle->location.y += movement_y;
     return true;
 }
 

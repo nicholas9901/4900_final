@@ -102,13 +102,14 @@ Intersection
 */
 typedef struct intersection {
     vector_T location;
-    vector_T endpoints[MAX_CONNECTIONS];
     phase_T phase;
     struct intersection* connections[MAX_CONNECTIONS]; 
     vehicle_list_T queued_vehicles[MAX_CONNECTIONS];
     int lengths[MAX_CONNECTIONS];
-    int turning_points[MAX_CONNECTIONS];
+    int turning_points_right[MAX_CONNECTIONS];
+    int turning_points_left[MAX_CONNECTIONS];
     int stopping_points[MAX_CONNECTIONS];
+    int end_points[MAX_CONNECTIONS];
     bool constructed;
     int timer;
     char id;

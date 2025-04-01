@@ -37,6 +37,7 @@ void init_vehicle(
 void init_active_vehicles(vehicle_list_T*, vehicle_T*, vehicle_T*);
 bool move_vehicle(vehicle_T*);
 void enqueue_vehicle(vehicle_list_T*, vehicle_T*, int);
+phase_T get_phase(direction_T, direction_T);
 bool emergency_arrived(vehicle_T*);
 
 

@@ -19,14 +19,18 @@ int main(int argc, char** argv) {
     vehicle_T      vehicles[NUM_VEHICLES_TRAFFIC];
     vehicle_T      emergency_vehicle;
     vehicle_list_T active_vehicles;
-    direction_T    list_instructions[2];
-    list_instructions[0] = SOUTH;
+    #define NINST 5
+    direction_T    list_instructions[NINST];
+    list_instructions[0] = NORTH;
     list_instructions[1] = WEST;
+    list_instructions[2] = WEST;
+    list_instructions[3] = SOUTH;
+    list_instructions[4] = EAST;
 
     instructions_T instructions_1;
-    init_instructions(&instructions_1, list_instructions, 2);
+    init_instructions(&instructions_1, list_instructions, NINST);
     
-    int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
+    int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH-10, DEFAULT_LENGTH, DEFAULT_LENGTH};
 
     init_intersection(
         &(intersections[0]), 
@@ -99,9 +103,6 @@ int main(int argc, char** argv) {
 
         for (int i = 0; i < NUM_INTERSECTIONS; i++) {
             if (phase_timer(&active_vehicles, &(intersections[i]))) {
-                #if GUI
-                print_intersection(&(intersections[i]), i);
-                #endif
             }
         }
         #if GUI

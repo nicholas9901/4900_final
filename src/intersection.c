@@ -1,6 +1,7 @@
 #include "prototypes.h"
 
 #if GUI
+#include "print.h"
 #include "draw.h"
 #endif
 
@@ -46,35 +47,35 @@ void init_intersection_construction(intersection_T* intersection)
     */
 
     /* Endpoints */
-    intersection->endpoints[NORTH].x = intersection->location.x;
-    intersection->endpoints[NORTH].y = intersection->location.y - 
+    intersection->end_points[NORTH] = intersection->location.y - 
         intersection->lengths[NORTH];
 
-    intersection->endpoints[EAST].x = intersection->location.x + 
+    intersection->end_points[EAST] = intersection->location.x + 
         intersection->lengths[EAST] + INTERSECTION_SIZE;
-    intersection->endpoints[EAST].y = intersection->location.y;
 
-    intersection->endpoints[SOUTH].x = intersection->location.x + 
-        LANE_OFFSET;
-    intersection->endpoints[SOUTH].y = intersection->location.y + 
+    intersection->end_points[SOUTH] = intersection->location.y + 
         intersection->lengths[SOUTH] + INTERSECTION_SIZE;
     
-
-    intersection->endpoints[WEST].x = intersection->location.x -
+    intersection->end_points[WEST] = intersection->location.x -
         intersection->lengths[WEST];
-    intersection->endpoints[WEST].y = intersection->location.y + 
-        LANE_OFFSET;
 
     /* Turning points */
-    intersection->turning_points[NORTH] = intersection->location.y + 
+    intersection->turning_points_right[NORTH] = intersection->location.y + 
+        LANE_OFFSET;
+    intersection->turning_points_left[NORTH] = intersection->location.y;
+
+    intersection->turning_points_right[EAST] = intersection->location.x;
+    intersection->turning_points_left[EAST] = intersection->location.x + 
         LANE_OFFSET;
 
-    intersection->turning_points[EAST] = intersection->location.x;
-
-    intersection->turning_points[SOUTH] = intersection->location.y;
-
-    intersection->turning_points[WEST] = intersection->location.x +
+    intersection->turning_points_right[SOUTH] = intersection->location.y;
+    intersection->turning_points_left[SOUTH] = intersection->location.y + 
         LANE_OFFSET;
+        
+    intersection->turning_points_right[WEST] = intersection->location.x +
+        LANE_OFFSET;
+    intersection->turning_points_left[WEST] = intersection->location.x;
+
     
     /* Stopping points */
     intersection->stopping_points[NORTH] = 
@@ -167,6 +168,7 @@ bool phase_timer(vehicle_list_T* active_vehicles, intersection_T* intersection)
     if (intersection->timer >= PHASE_TIMER ) {
         intersection->phase = (intersection->phase + 1) % NUM_PHASES;
         intersection->timer = 0;
+        print_intersection(intersection);
         dequeue_vehicles(active_vehicles, intersection);
         draw_phase_change(intersection);
         return true;
