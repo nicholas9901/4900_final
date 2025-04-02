@@ -16,8 +16,9 @@
 #define LANE_OFFSET       (INTERSECTION_SIZE / 2)
 #define DIV_WIDTH         4 /* Lane division and stopping point widths */
 #define DIV_OFFSET        ((INTERSECTION_SIZE / 2) - DIV_WIDTH + 1)
-#define PHASE_TIMER       50
+#define INIT_PHASE_TIMER  50
 #define NUM_PHASES        4
+#define TIME_TO_CROSS     (INTERSECTION_SIZE / DEFAULT_SPEED)
 
 /* Vehicle constants */
 #define DEFAULT_SPEED   2

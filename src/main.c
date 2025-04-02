@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
         }
 
         for (int i = 0; i < NUM_INTERSECTIONS; i++) {
-            if (phase_timer(&active_vehicles, &(intersections[i]))) {
+            if (tlc_baseline(&active_vehicles, &(intersections[i]))) {
             }
         }
         #if GUI

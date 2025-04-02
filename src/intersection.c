@@ -17,8 +17,8 @@ void init_intersection(
     char id)
 {
     intersection->phase = HORIZONTAL_SR;    
-    intersection->timer = 0;
     intersection->id    = id;
+    intersection->timer = INIT_PHASE_TIMER;
     
     for (int i = 0; i < MAX_CONNECTIONS; i++) {
         intersection->connections[i]         = intersection;
@@ -203,44 +203,81 @@ int total_vertical(intersection_T* intersection)
 }
 
 /*
+Max Flow
+    Helper function for the TLC algorithms.
+    Returns the direction corresponding to the maximum queue between two 
+    opposing traffic flows given the current phase.
+*/
+int max_flow(intersection_T * intersection)
+{
+    /* Consider the vertical phases */
+    if (intersection->phase < HORIZONTAL_L) {
+        /* 
+        If the NORTH queue is greater than SOUTH, return NORTH. 
+        Else, return SOUTH. 
+        */
+        return intersection->queued_vehicles[NORTH].num > 
+            intersection->queued_vehicles[SOUTH].num ? 
+            intersection->queued_vehicles[NORTH].num :
+            intersection->queued_vehicles[SOUTH].num;
+    }
+    /* Consider the horizontal phases */
+    else {
+        /* 
+        If the EAST queue is greater than WEST, return EAST. 
+        Else, return WEST. 
+        */
+       return intersection->queued_vehicles[EAST].num > 
+            intersection->queued_vehicles[WEST].num ? 
+            intersection->queued_vehicles[EAST].num :
+            intersection->queued_vehicles[WEST].num;
+    }
+}
+
+/*
 Traffic Light Control Algorithm: 
 An Intelligent Traffic Light scheduling algorithm through VANETs, by Younes &
 Boukereche, from 
-    The baseline algorithm with no priority for emergency vehicles.
+    The baseline algorithm with no priority for emergency vehicles. The time of
+    a phase is proportional to the queue density in the corresponding 
+    directions.
 */
 bool tlc_baseline(vehicle_list_T* active_vehicles, intersection_T* intersection)
 {
     /* Do nothing if there is no traffic */
-    if (total_in_queue(intersection) + active_vehicles->num <= 0) {
-        return false;
+    if (total_in_queue(intersection) <= 0 ) { return false; }
+
+    if (intersection->timer <= 0) {
+        int cycles = NUM_PHASES;
+        while (intersection->timer <= 0) {
+            intersection->phase = (intersection->phase + 1) % NUM_PHASES;
+            intersection->timer = max_flow(intersection) * TIME_TO_CROSS;
+            cycles--;
+            if (cycles <= 0) { return false; }
+        }
+        dequeue_vehicles(active_vehicles, intersection);
+        draw_phase_change(intersection);    
+        return true;
     }
-    return true;
-    /*  */
+    intersection->timer--;
+    return false;
 }
 
 /*
 Traffic Light Control Algorithm: 
-Traffic Management for Emergency Vehicle Priority Based on Visual Sensing by
-Nellore and Hancke
+Based off two papers: 
+  - Traffic Management for Emergency Vehicle Priority Based on Visual Sensing by
+    Nellore and Hancke
+  - A Smart Priority-Based Traffic Control System for Emergency Vehicles by 
+    Karmakar et al.
+
+    The emergency algorithm which factors in queue densities as well as 
+    vehicle priorities.
 
 */
-bool tlc_emergency_nellore(
+bool tlc_emergency(
     vehicle_list_T* active_vehicles, 
-    vehicle_T* emergency_Vehicle, 
-    intersection_T* intersection)
-{
-    return true;
-}
-
-/*
-Traffic Light Control Algorithm: 
-A Smart Priority-Based Traffic Control System for Emergency Vehicles by 
-Karmakar et al.
-
-*/
-bool tlc_emergency_karmakar(
-    vehicle_list_T* active_vehicles, 
-    vehicle_T* emergency_Vehicle, 
+    vehicle_T* emergency_vehicle, 
     intersection_T* intersection)
 {
     return true;
@@ -253,16 +290,16 @@ Phase Timer
 #if GUI
 bool phase_timer(vehicle_list_T* active_vehicles, intersection_T* intersection)
 {
-    if (intersection->timer >= PHASE_TIMER ) {
+    if (intersection->timer < 0 ) {
         intersection->phase = (intersection->phase + 1) % NUM_PHASES;
-        intersection->timer = 0;
+        intersection->timer = TIME_TO_CROSS;
         print_intersection(intersection);
         dequeue_vehicles(active_vehicles, intersection);
         draw_phase_change(intersection);
         return true;
     }
     else { 
-        intersection->timer++; 
+        intersection->timer--; 
         return false;
     }
 }
