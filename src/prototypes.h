@@ -42,16 +42,9 @@ bool emergency_arrived(vehicle_T*);
 
 
 /* intersection.c */
-void init_intersection(
-    intersection_T*,
-    intersection_T*,
-    intersection_T*,
-    intersection_T*,
-    intersection_T*,
-    int[MAX_CONNECTIONS],
-    char);
-
-void init_intersection_construction(intersection_T*);
+void init_intersection(intersection_T*, int[MAX_CONNECTIONS], char);
+void connect_intersection(intersection_T*, intersection_T*, direction_T);    
+void calculate_intersection_lengths(intersection_T*);
 void transfer_vehicles(vehicle_list_T*, vehicle_list_T*);
 void dequeue_vehicles(vehicle_list_T*, intersection_T*);
 

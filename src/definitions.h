@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 /* Struct constants */
-#define NUM_INTERSECTIONS    2
+#define NUM_INTERSECTIONS    5
 #define NUM_VEHICLES_TRAFFIC 1
 #define NUM_VEHICLES_TOTAL   (NUM_VEHICLES_TRAFFIC + 1)
 #define NUM_DIRECTIONS       4
@@ -30,7 +30,15 @@
 #define INIT_INTERSECTION_START_X ((MAX_X / 2) - INTERSECTION_SIZE)
 #define INIT_INTERSECTION_START_Y ((MAX_Y / 2) - INTERSECTION_SIZE)
 
-#define SLEEP_INTERVAL 30000
+#define SLEEP_INTERVAL 20000
+
+/* External variables */
+static const int direction_matrix[4][2] = {
+    {0, -1}, // NORTH
+    {1,  0}, // EAST
+    {0,  1}, // SOUTH
+    {-1, 0}  // WEST
+};
 
 /* Enumerated types */
 typedef enum {NORTH, EAST, SOUTH, WEST} direction_T;
@@ -110,7 +118,6 @@ typedef struct intersection {
     int turning_points_left[MAX_CONNECTIONS];
     int stopping_points[MAX_CONNECTIONS];
     int end_points[MAX_CONNECTIONS];
-    bool constructed;
     int timer;
     char id;
 } intersection_T;

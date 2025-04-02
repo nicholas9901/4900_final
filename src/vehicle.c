@@ -122,13 +122,6 @@ Move Vehicle:
 */
 bool move_vehicle(vehicle_T* vehicle)
 {
-    static const int direction_matrix[4][2] = {
-        {0, -1}, // NORTH
-        {1,  0}, // EAST
-        {0,  1}, // SOUTH
-        {-1, 0}  // WEST
-    };
-
     int direction      = vehicle->instructions.list[vehicle->instructions.current];
     int next_direction = vehicle->instructions.list[vehicle->instructions.next];
     int movement_x     = direction_matrix[direction][0] * vehicle->speed;
@@ -187,16 +180,16 @@ bool move_vehicle(vehicle_T* vehicle)
         (vehicle->location.y - end_point) * direction_matrix[direction][1];
 
     if (difference >= 0) {
-        direction_T connection = determine_connection(direction);
-        if (direction % 2 == 1 /* Horizontal */) {
+        direction_T opposite = determine_connection(direction);
+        if (direction % 2 == 1 /* Horizontal directions */) {
             vehicle->location.x =
-                vehicle->intersection->connections[direction]->end_points[connection];                    
+                vehicle->intersection->connections[direction]->end_points[opposite];                    
         }
-        else /* Vertical */ {
+        else /* Vertical directions */ {
             vehicle->location.y = 
-                vehicle->intersection->connections[direction]->end_points[connection];
+                vehicle->intersection->connections[direction]->end_points[opposite];
         }
-        vehicle->intersection = vehicle->intersection->connections[connection];
+        vehicle->intersection = vehicle->intersection->connections[direction];
         vehicle->turning  = true;
         vehicle->stopping = true;
     }

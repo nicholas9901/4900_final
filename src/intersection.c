@@ -8,54 +8,90 @@
 /*
 Initialize Intersection
     Note that the location isn't set, this will be done when constructing
-    the network judging by the order of which they are connected.
+    the network judging by the order of which they are connected. Neither does
+    this apply the connections--by default, all connections connect to itself.
 */
 void init_intersection(
     intersection_T* intersection,
-    intersection_T* connection_north,
-    intersection_T* connection_east,
-    intersection_T* connection_south,
-    intersection_T* connection_west,
     int lengths[MAX_CONNECTIONS],
     char id)
 {
-    intersection->connections[NORTH] = connection_north;
-    intersection->connections[EAST]  = connection_east;
-    intersection->connections[SOUTH] = connection_south;
-    intersection->connections[WEST]  = connection_west;
-
-    intersection->phase       = HORIZONTAL_SR;    
-    intersection->constructed = false;
-    intersection->timer       = 0;
-    intersection->id          = id;
+    intersection->phase = HORIZONTAL_SR;    
+    intersection->timer = 0;
+    intersection->id    = id;
     
     for (int i = 0; i < MAX_CONNECTIONS; i++) {
-        intersection->lengths[i] = lengths[i];
+        intersection->connections[i]         = intersection;
+        intersection->lengths[i]             = lengths[i];
         intersection->queued_vehicles[i].num = 0;
     }    
 }
 
 /*
-Initialize Intersection Locations
+Connect Intersection
+    Given an intersection from, connects from to new, its connection varying
+    by the given direction.
 */
-void init_intersection_construction(intersection_T* intersection)
+void connect_intersection(
+    intersection_T* from, 
+    intersection_T* new,
+    direction_T direction)
 {
     /* 
-    The first intersection should be in the middle of the simulation canvas,
-    and all following intersections will then recursively follow from the 
-    previous by iterating through its connections.
+    Do a traversal to determine loops--this is analogous to a ciruclar doubly 
+    linked list 
     */
+    direction_T opposite = determine_connection(direction);
+    intersection_T* curr = from->connections[opposite];
+    intersection_T* prev = curr;
 
+    while (curr != from) {
+        prev = curr;
+        curr = curr->connections[opposite];
+    }
+
+    prev->connections[opposite]  = new; 
+    new->connections[direction]  = prev;
+    from->connections[direction] = new;
+    new->connections[opposite]   = from;
+
+    /* Apply the correct transformations to the new intersection */
+    if (direction % 2 == 1 /* Horizontal directions */ ) {
+        new->location.x = 
+            from->location.x + (INTERSECTION_SIZE + from->lengths[direction] + 
+            from->connections[direction]->lengths[opposite]) *
+            direction_matrix[direction][0];
+
+        new->location.y = from->location.y;
+    }
+    else /* Vertical directions */ {
+        new->location.x = from->location.x;
+
+        new->location.y = 
+            from->location.y + (INTERSECTION_SIZE + from->lengths[direction] + 
+            from->connections[direction]->lengths[opposite]) * 
+            direction_matrix[direction][1];            
+    }
+    calculate_intersection_lengths(new);
+}
+
+/*
+Calculate Intersection Lengths
+    Calculates all the integer values associated with each road of an 
+    intersection
+*/
+void calculate_intersection_lengths(intersection_T* intersection)
+{
     /* Endpoints */
     intersection->end_points[NORTH] = intersection->location.y - 
-        intersection->lengths[NORTH];
+    intersection->lengths[NORTH];
 
     intersection->end_points[EAST] = intersection->location.x + 
         intersection->lengths[EAST] + INTERSECTION_SIZE;
 
     intersection->end_points[SOUTH] = intersection->location.y + 
         intersection->lengths[SOUTH] + INTERSECTION_SIZE;
-    
+
     intersection->end_points[WEST] = intersection->location.x -
         intersection->lengths[WEST];
 
@@ -76,11 +112,11 @@ void init_intersection_construction(intersection_T* intersection)
         LANE_OFFSET;
     intersection->turning_points_left[WEST] = intersection->location.x;
 
-    
+
     /* Stopping points */
     intersection->stopping_points[NORTH] = 
         intersection->location.y + INTERSECTION_SIZE + DIV_WIDTH;
-    
+
     intersection->stopping_points[EAST] = 
         intersection->location.x - DIV_WIDTH - VEHICLE_SIZE;
 
@@ -89,34 +125,6 @@ void init_intersection_construction(intersection_T* intersection)
 
     intersection->stopping_points[WEST] = 
         intersection->location.x + INTERSECTION_SIZE + DIV_WIDTH;
-
-    intersection->constructed = true;
-
-    for (int i = 0; i < MAX_CONNECTIONS; i++) {
-        if (!intersection->connections[i]->constructed) {
-            direction_T opposite = determine_connection(i);
-
-            if (i == NORTH || i == SOUTH) {
-                intersection->connections[i]->location.x = 
-                    intersection->location.x;
-
-                intersection->connections[i]->location.y = 
-                    intersection->location.y + INTERSECTION_SIZE +
-                    intersection->lengths[i] + 
-                    intersection->connections[i]->lengths[opposite];
-            }
-            else if (i == EAST || i == WEST) {
-                intersection->connections[i]->location.x = 
-                    intersection->location.x + INTERSECTION_SIZE +
-                    intersection->lengths[i] + 
-                    intersection->connections[i]->lengths[opposite];
-
-                intersection->connections[i]->location.y = 
-                    intersection->location.y;
-            }
-            init_intersection_construction(intersection->connections[i]);
-        }
-    }
 }
 
 /*

@@ -21,47 +21,41 @@ int main(int argc, char** argv) {
     vehicle_list_T active_vehicles;
     #define NINST 5
     direction_T    list_instructions[NINST];
-    list_instructions[0] = NORTH;
-    list_instructions[1] = WEST;
-    list_instructions[2] = WEST;
-    list_instructions[3] = SOUTH;
-    list_instructions[4] = EAST;
+    list_instructions[0] = EAST;
+    list_instructions[1] = EAST;
+    list_instructions[2] = SOUTH;
+    list_instructions[3] = WEST;
+    list_instructions[4] = NORTH;
 
     instructions_T instructions_1;
     init_instructions(&instructions_1, list_instructions, NINST);
     
-    int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH-10, DEFAULT_LENGTH, DEFAULT_LENGTH};
+    int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
 
-    init_intersection(
-        &(intersections[0]), 
-        &(intersections[0]), 
-        &(intersections[1]), 
-        &(intersections[0]), 
-        &(intersections[1]),
-        road_lengths_1,
-        0);
-
-    init_intersection(
-        &(intersections[1]), 
-        &(intersections[1]), 
-        &(intersections[0]), 
-        &(intersections[1]), 
-        &(intersections[0]), 
-        road_lengths_1,
-        1);
-
-    /* Intersection coordinate generation */
+    /* Initialize the intersections */
+    init_intersection(&(intersections[0]), road_lengths_1, 0);
+    init_intersection(&(intersections[1]), road_lengths_1, 1);
+    init_intersection(&(intersections[2]), road_lengths_1, 2);
+    init_intersection(&(intersections[3]), road_lengths_1, 3);
+    init_intersection(&(intersections[4]), road_lengths_1, 4);
+    
+    /* Determine position and lengths for the first intersection */
     init_vector(
         &(intersections[0].location),
         INIT_INTERSECTION_START_X, 
         INIT_INTERSECTION_START_Y);
+    calculate_intersection_lengths(&(intersections[0]));
 
-    init_intersection_construction(&(intersections[0]));
-    
+    connect_intersection((&intersections[0]), (&intersections[1]), EAST);
+    connect_intersection((&intersections[0]), (&intersections[2]), WEST);
+    connect_intersection((&intersections[0]), (&intersections[3]), NORTH);
+    connect_intersection((&intersections[1]), (&intersections[4]), NORTH);
+    connect_intersection((&intersections[3]), (&intersections[4]), EAST);
+
     /* Emergency vehicle */
     init_vehicle(
         &emergency_vehicle,
-        &(intersections[0]),
+        &(intersections[3]),
         &instructions_1,        
         PRIORITY_HIGH,
         EMERGENCY_SPEED,
