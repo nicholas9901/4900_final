@@ -19,6 +19,7 @@ void init_intersection(
     intersection->phase = HORIZONTAL_SR;    
     intersection->id    = id;
     intersection->timer = INIT_PHASE_TIMER;
+    intersection->priority_service = false;
     
     for (int i = 0; i < MAX_CONNECTIONS; i++) {
         intersection->connections[i]         = intersection;
@@ -280,8 +281,40 @@ bool tlc_emergency(
     vehicle_T* emergency_vehicle, 
     intersection_T* intersection)
 {
-    return true;
-}
+    /* Do nothing if there is no traffic */
+    if (total_in_queue(intersection) <= 0 ) { return false; }
+
+    /* Immediately service the emergency vehicle if the priority flag has been set */
+    if (intersection->priority_service == true) {
+        intersection->phase = get_phase(
+            emergency_vehicle->instructions.list[emergency_vehicle->instructions.current],
+            emergency_vehicle->instructions.list[emergency_vehicle->instructions.next]);
+        
+        intersection->timer = INTERSECTION_SIZE / emergency_vehicle->speed;
+        intersection->priority_service = false;
+        dequeue_vehicles(active_vehicles, intersection);
+        #if GUI
+        draw_phase_change(intersection);    
+        #endif
+        return true;
+    }
+
+    if (intersection->timer <= 0) {
+        int cycles = NUM_PHASES;
+        while (intersection->timer <= 0) {
+            intersection->phase = (intersection->phase + 1) % NUM_PHASES;
+            intersection->timer = max_flow(intersection) * TIME_TO_CROSS;
+            cycles--;
+            if (cycles <= 0) { return false; }
+        }
+        dequeue_vehicles(active_vehicles, intersection);
+        #if GUI
+        draw_phase_change(intersection);    
+        #endif
+        return true;
+    }
+    intersection->timer--;
+    return false;}
 
 /*
 Phase Timer

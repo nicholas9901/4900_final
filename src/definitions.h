@@ -19,6 +19,7 @@
 #define INIT_PHASE_TIMER  50
 #define NUM_PHASES        4
 #define TIME_TO_CROSS     (INTERSECTION_SIZE / DEFAULT_SPEED)
+#define PRIORITY_SERVICE_NONE -1
 
 /* Vehicle constants */
 #define DEFAULT_SPEED   2
@@ -43,7 +44,7 @@ static const int direction_matrix[4][2] = {
 
 /* Enumerated types */
 typedef enum {NORTH, EAST, SOUTH, WEST} direction_T;
-typedef enum {PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW} vehicle_priority_T;
+typedef enum {PRIORITY_LOW, PRIORITY_MEDIUM, PRIORITY_HIGH} vehicle_priority_T;
 
 /*
 Types of phases
@@ -121,4 +122,6 @@ typedef struct intersection {
     int end_points[MAX_CONNECTIONS];
     int timer;
     char id;
+    bool priority_service; /* Used to service emergency vehicles */
+
 } intersection_T;

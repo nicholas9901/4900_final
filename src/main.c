@@ -96,7 +96,9 @@ int main(int argc, char** argv) {
         }
 
         for (int i = 0; i < NUM_INTERSECTIONS; i++) {
-            if (tlc_baseline(&active_vehicles, &(intersections[i]))) {
+            // if (tlc_baseline(&active_vehicles, &(intersections[i]))) {
+            // }
+            if (tlc_emergency(&active_vehicles, &emergency_vehicle, &(intersections[i]))) {
             }
         }
         #if GUI

@@ -76,7 +76,9 @@ void init_active_vehicles(
 /*
 Remove Active Vehicle
     Remove the vehicle in the active vehicles list and put it into the 
-    intersection queue.
+    intersection queue. 
+    If a vehicle is of high priority, update the intersection's priority
+    service variable.
 */
 void enqueue_vehicle(
     vehicle_list_T* active_vehicles, 
@@ -90,6 +92,9 @@ void enqueue_vehicle(
         active_vehicles->vehicles[i] = active_vehicles->vehicles[i + 1];
     }
     current_list->vehicles[(current_list->num)++] = current_vehicle;
+    if (current_vehicle->priority >= PRIORITY_HIGH) {
+        current_vehicle->intersection->priority_service = true;
+    }
 }
 
 /*
