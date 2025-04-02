@@ -202,26 +202,22 @@ void init_draw_intersection(intersection_T* intersection)
     intersection_icons[intersection->id].stops[NORTH].h = DIV_WIDTH;
     intersection_icons[intersection->id].stops[NORTH].x = center.x;
     intersection_icons[intersection->id].stops[NORTH].y = south.y;
-    SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
     
     intersection_icons[intersection->id].stops[EAST].w = DIV_WIDTH;
     intersection_icons[intersection->id].stops[EAST].h = INTERSECTION_SIZE;
     intersection_icons[intersection->id].stops[EAST].x = center.x - DIV_WIDTH;
     intersection_icons[intersection->id].stops[EAST].y = center.y;
-    SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
 
     intersection_icons[intersection->id].stops[SOUTH].w = INTERSECTION_SIZE;
     intersection_icons[intersection->id].stops[SOUTH].h = DIV_WIDTH;
     intersection_icons[intersection->id].stops[SOUTH].x = center.x;
     intersection_icons[intersection->id].stops[SOUTH].y = center.y - DIV_WIDTH;
-    SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
 
     intersection_icons[intersection->id].stops[WEST].w = DIV_WIDTH;
     intersection_icons[intersection->id].stops[WEST].h = INTERSECTION_SIZE;
     intersection_icons[intersection->id].stops[WEST].x = east.x;
     intersection_icons[intersection->id].stops[WEST].y = center.y;
-    SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
-
+    draw_phase_change(intersection);
 
     SDL_UpdateWindowSurface(win);
 }

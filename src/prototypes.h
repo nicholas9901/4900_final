@@ -47,7 +47,12 @@ void connect_intersection(intersection_T*, intersection_T*, direction_T);
 void calculate_intersection_lengths(intersection_T*);
 void transfer_vehicles(vehicle_list_T*, vehicle_list_T*);
 void dequeue_vehicles(vehicle_list_T*, intersection_T*);
-
+int total_in_queue(intersection_T*);
+int total_horizontal(intersection_T*);
+int total_vertical(intersection_T*);
+bool tlc_baseline(vehicle_list_T*, intersection_T*);
+bool tlc_emergency_nellore(vehicle_list_T*, vehicle_T*, intersection_T*);
+bool tlc_emergency_karmakar(vehicle_list_T*, vehicle_T*, intersection_T*);
 
 #if GUI
 bool phase_timer(vehicle_list_T*, intersection_T*);

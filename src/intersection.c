@@ -167,6 +167,86 @@ void dequeue_vehicles(
 }
 
 /*
+Total In Queue
+    Helper function for the TLC algorithms.
+    Return the total number of vehicles in the directional queues of an 
+    intersection.
+*/
+int total_in_queue(intersection_T* intersection) {
+    int sum = 0;
+    for (int i = 0; i < MAX_CONNECTIONS; i++) {
+        sum += intersection->queued_vehicles[i].num;
+    }
+    return sum;
+}
+
+/*
+Total Horizontal
+    Helper function for the TLC algorithms.
+    Returns the number of vehicles in the east and west queues.
+*/
+int total_horizontal(intersection_T* intersection)
+{
+    return intersection->queued_vehicles[EAST].num + 
+        intersection->queued_vehicles[WEST].num;
+}
+
+/*
+Total Vertical
+    Helper function for the TLC algorithms.
+    Returns the number of vehicles in the north and south queues.
+*/
+int total_vertical(intersection_T* intersection)
+{
+    return intersection->queued_vehicles[NORTH].num + 
+        intersection->queued_vehicles[SOUTH].num;
+}
+
+/*
+Traffic Light Control Algorithm: 
+An Intelligent Traffic Light scheduling algorithm through VANETs, by Younes &
+Boukereche, from 
+    The baseline algorithm with no priority for emergency vehicles.
+*/
+bool tlc_baseline(vehicle_list_T* active_vehicles, intersection_T* intersection)
+{
+    /* Do nothing if there is no traffic */
+    if (total_in_queue(intersection) + active_vehicles->num <= 0) {
+        return false;
+    }
+    return true;
+    /*  */
+}
+
+/*
+Traffic Light Control Algorithm: 
+Traffic Management for Emergency Vehicle Priority Based on Visual Sensing by
+Nellore and Hancke
+
+*/
+bool tlc_emergency_nellore(
+    vehicle_list_T* active_vehicles, 
+    vehicle_T* emergency_Vehicle, 
+    intersection_T* intersection)
+{
+    return true;
+}
+
+/*
+Traffic Light Control Algorithm: 
+A Smart Priority-Based Traffic Control System for Emergency Vehicles by 
+Karmakar et al.
+
+*/
+bool tlc_emergency_karmakar(
+    vehicle_list_T* active_vehicles, 
+    vehicle_T* emergency_Vehicle, 
+    intersection_T* intersection)
+{
+    return true;
+}
+
+/*
 Phase Timer
     Sample phase changing algorithm for testing
 */
