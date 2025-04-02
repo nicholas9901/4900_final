@@ -17,10 +17,34 @@ void init_vehicle(
     direction_T corresponding_direction = determine_connection(
         instructions->list[instructions->current]);
 
-    init_vector(
-        &(vehicle->location), 
-        intersection->location.x,
-        intersection->end_points[corresponding_direction]);
+    switch (corresponding_direction) {
+        case NORTH:
+            init_vector(
+                &(vehicle->location), 
+                intersection->location.x,
+                intersection->end_points[corresponding_direction]);    
+            break;
+        case EAST:
+            init_vector(
+                &(vehicle->location), 
+                intersection->end_points[corresponding_direction],    
+                intersection->location.y);
+            break;
+        case SOUTH:
+            init_vector(
+                &(vehicle->location), 
+                intersection->location.x + LANE_OFFSET,
+                intersection->end_points[corresponding_direction]);
+            break;
+        case WEST:
+            init_vector(
+                &(vehicle->location), 
+                intersection->end_points[corresponding_direction],    
+                intersection->location.y + LANE_OFFSET);
+            break;            
+        default:
+            direction_error(corresponding_direction);
+    }
     
     vehicle->intersection = intersection;
     vehicle->instructions = *instructions;
