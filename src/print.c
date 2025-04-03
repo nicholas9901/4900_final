@@ -76,12 +76,18 @@ Print Average Queue Times
 */
 void print_avg_queue_times(vehicle_T* vehicles, vehicle_T* emergency_vehicle)
 {
+    double total_all = 0;
     for (int i = 0; i < NUM_VEHICLES_TRAFFIC; i++) {
+        double avg = vehicles[i].queue_time.total / vehicles[i].queue_time.num;
         printf(
             "Average queue time for vehicle [%d]: %f\n",
             vehicles[i].id,
-            vehicles[i].queue_time.total / vehicles[i].queue_time.num);
+            avg);
+        total_all += avg;
     }
+    printf(
+        "Average queue time of all vehicles: %f\n", 
+        total_all / NUM_VEHICLES_TRAFFIC);
     printf(
         "Average queue time for the emergency vehicle: %f\n",
         emergency_vehicle->queue_time.total / emergency_vehicle->queue_time.num);

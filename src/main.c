@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
     clock_gettime(CLOCK_MONOTONIC, &next_wakeup);
 
     /* Main program loop */
-    while(1){//!emergency_arrived(&dispatch_point, &emergency_vehicle)) {
+    while (!emergency_arrived(&dispatch_point, &emergency_vehicle)) {
 
         clock_gettime(CLOCK_MONOTONIC, &start_time); /* Record start time */
 
