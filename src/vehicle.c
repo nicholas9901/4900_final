@@ -203,8 +203,3 @@ bool move_vehicle(vehicle_T* vehicle)
     vehicle->location.y += movement_y;
     return true;
 }
-
-bool emergency_arrived(vehicle_T* vehicle)
-{
-    return true;
-}

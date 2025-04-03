@@ -19,18 +19,20 @@
 #define INIT_PHASE_TIMER  50
 #define NUM_PHASES        4
 #define TIME_TO_CROSS     (INTERSECTION_SIZE / DEFAULT_SPEED)
-#define PRIORITY_SERVICE_NONE -1
 
 /* Vehicle constants */
 #define DEFAULT_SPEED   2
 #define EMERGENCY_SPEED 3
 #define VEHICLE_SIZE        (INTERSECTION_SIZE / 2)
+#define NUM_INST_1      5 /* Number of instructions for instruction set 1 */
+
 
 /* Location constants */
 #define MAX_X 1200
 #define MAX_Y 1200
 #define INIT_INTERSECTION_START_X ((MAX_X / 2) - INTERSECTION_SIZE)
 #define INIT_INTERSECTION_START_Y ((MAX_Y / 2) - INTERSECTION_SIZE)
+#define SUCCESS_DISTANCE_THRESHOLD 100 /* In squared distance */
 
 #define SLEEP_INTERVAL 20000
 

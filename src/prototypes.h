@@ -12,6 +12,7 @@ prototypes.h:
 
 /* vector.c */
 void init_vector(vector_T*, int, int);
+bool emergency_arrived(vector_T*, vehicle_T*);
 
 /* direction.c */
 void direction_error(direction_T);
@@ -38,8 +39,6 @@ void init_active_vehicles(vehicle_list_T*, vehicle_T*, vehicle_T*);
 bool move_vehicle(vehicle_T*);
 void enqueue_vehicle(vehicle_list_T*, vehicle_T*, int);
 phase_T get_phase(direction_T, direction_T);
-bool emergency_arrived(vehicle_T*);
-
 
 /* intersection.c */
 void init_intersection(intersection_T*, int[MAX_CONNECTIONS], char);

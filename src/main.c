@@ -19,8 +19,9 @@ int main(int argc, char** argv) {
     vehicle_T      vehicles[NUM_VEHICLES_TRAFFIC];
     vehicle_T      emergency_vehicle;
     vehicle_list_T active_vehicles;
-    #define NINST 5
-    direction_T    list_instructions[NINST];
+    direction_T    list_instructions[NUM_INST_1];
+    vector_T       dispatch_point;
+
     list_instructions[0] = EAST;
     list_instructions[1] = EAST;
     list_instructions[2] = SOUTH;
@@ -28,7 +29,7 @@ int main(int argc, char** argv) {
     list_instructions[4] = NORTH;
 
     instructions_T instructions_1;
-    init_instructions(&instructions_1, list_instructions, NINST);
+    init_instructions(&instructions_1, list_instructions, NUM_INST_1);
     
     int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
 
@@ -46,11 +47,17 @@ int main(int argc, char** argv) {
         INIT_INTERSECTION_START_Y);
     calculate_intersection_lengths(&(intersections[0]));
 
-    connect_intersection((&intersections[0]), (&intersections[1]), EAST);
-    connect_intersection((&intersections[0]), (&intersections[2]), WEST);
-    connect_intersection((&intersections[0]), (&intersections[3]), NORTH);
-    connect_intersection((&intersections[1]), (&intersections[4]), NORTH);
-    connect_intersection((&intersections[3]), (&intersections[4]), EAST);
+    connect_intersection(&(intersections[0]), &(intersections[1]), EAST);
+    connect_intersection(&(intersections[0]), &(intersections[2]), WEST);
+    connect_intersection(&(intersections[0]), &(intersections[3]), NORTH);
+    connect_intersection(&(intersections[1]), &(intersections[4]), NORTH);
+    connect_intersection(&(intersections[3]), &(intersections[4]), EAST);
+    
+    /* Set the dispatch point */
+    init_vector(
+        &dispatch_point,
+        intersections[4].end_points[EAST],
+        intersections[4].location.y + LANE_OFFSET);
 
     /* Emergency vehicle */
     init_vehicle(
@@ -85,7 +92,7 @@ int main(int argc, char** argv) {
     #endif
     
     /* Main program loop */
-    while(emergency_arrived(&emergency_vehicle)) {
+    while(!emergency_arrived(&dispatch_point, &emergency_vehicle)) {
         for (int i = 0; i < active_vehicles.num; i++) {
             if (!move_vehicle(active_vehicles.vehicles[i])) {
                 enqueue_vehicle(
@@ -107,12 +114,12 @@ int main(int argc, char** argv) {
         #endif
         usleep(SLEEP_INTERVAL);
     }
+    printf("success\n");
 
     #if GUI
+
     while(1) {
         poll_for_exit();
     }
     #endif
-
-    printf("exit\n");
 }
