@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     struct timespec next_wakeup, start_time, end_time; /* Used to assess performance */
 
 
-    //Scenario 1: set NUM_VEHICLES_TRAFFIC = 10
+    //Scenario 1 (high traffic density): set NUM_VEHICLES_TRAFFIC = 14, NUM_INTERSECTIONS = 7
     direction_T list_instructions1[NUM_INST_1] = { EAST, EAST, SOUTH, WEST, NORTH };
     direction_T list_instructions2[NUM_INST_1] = { EAST, EAST, SOUTH, WEST, SOUTH };
     direction_T list_instructions3[NUM_INST_1] = { WEST, WEST, SOUTH, EAST, SOUTH };
@@ -37,10 +37,18 @@ int main(int argc, char** argv) {
     direction_T list_instructions7[NUM_INST_1] = { NORTH, WEST, SOUTH, WEST, NORTH };
     direction_T list_instructions8[NUM_INST_1] = { WEST, SOUTH, WEST, NORTH, WEST };
     direction_T list_instructions9[NUM_INST_1] = { NORTH, EAST, NORTH, WEST, WEST };
-    direction_T list_instructions10[NUM_INST_1] = { SOUTH, EAST, NORTH, WEST, NORTH };
+    direction_T list_instructions10[NUM_INST_1] = { SOUTH, EAST, NORTH, EAST, NORTH };
+    direction_T list_instructions11[NUM_INST_1] = { WEST, WEST, SOUTH, EAST, EAST };
+    direction_T list_instructions12[NUM_INST_1] = { WEST, NORTH, WEST, WEST, WEST };
+    direction_T list_instructions13[NUM_INST_1] = { SOUTH, EAST, SOUTH, EAST, SOUTH };
+    direction_T list_instructions14[NUM_INST_1] = { NORTH, NORTH, WEST, SOUTH, WEST };
+
+
 
     instructions_T instructions_1, instructions_2, instructions_3, instructions_4, instructions_5, 
-        instructions_6, instructions_7, instructions_8, instructions_9, instructions_10;
+        instructions_6, instructions_7, instructions_8, instructions_9, instructions_10, instructions_11,
+        instructions_12, instructions_13, instructions_14;
+
     init_instructions(&instructions_1, list_instructions1, NUM_INST_1);
     init_instructions(&instructions_2, list_instructions2, NUM_INST_1);
     init_instructions(&instructions_3, list_instructions3, NUM_INST_1);
@@ -51,6 +59,11 @@ int main(int argc, char** argv) {
     init_instructions(&instructions_8, list_instructions8, NUM_INST_1);
     init_instructions(&instructions_9, list_instructions9, NUM_INST_1);
     init_instructions(&instructions_10, list_instructions10, NUM_INST_1);
+    init_instructions(&instructions_11, list_instructions11, NUM_INST_1);
+    init_instructions(&instructions_12, list_instructions12, NUM_INST_1);
+    init_instructions(&instructions_13, list_instructions13, NUM_INST_1);
+    init_instructions(&instructions_14, list_instructions14, NUM_INST_1);
+
 
    
     int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH+30, DEFAULT_LENGTH+30, DEFAULT_LENGTH, DEFAULT_LENGTH};
@@ -61,6 +74,11 @@ int main(int argc, char** argv) {
     init_intersection(&(intersections[2]), road_lengths_1, 2);
     init_intersection(&(intersections[3]), road_lengths_1, 3);
     init_intersection(&(intersections[4]), road_lengths_1, 4);
+    //extra intersections (scenario 1)
+    init_intersection(&(intersections[5]), road_lengths_1, 5);
+    init_intersection(&(intersections[6]), road_lengths_1, 6);
+
+
     
     /* Determine position and lengths for the first intersection */
     init_vector(
@@ -74,6 +92,11 @@ int main(int argc, char** argv) {
     connect_intersection(&(intersections[0]), &(intersections[3]), NORTH);
     connect_intersection(&(intersections[1]), &(intersections[4]), NORTH);
     connect_intersection(&(intersections[3]), &(intersections[4]), EAST);
+    //extra intersections (scenario 1)
+    connect_intersection(&(intersections[2]), &(intersections[5]), NORTH);
+    connect_intersection(&(intersections[3]), &(intersections[5]), WEST);
+    connect_intersection(&(intersections[5]), &(intersections[6]), WEST);
+
     
     /* Set the dispatch point */
     init_vector(
@@ -99,10 +122,14 @@ int main(int argc, char** argv) {
     init_vehicle(&(vehicles[3]), &(intersections[2]), &instructions_4, PRIORITY_LOW, DEFAULT_SPEED, 3);
     init_vehicle(&(vehicles[4]), &(intersections[3]), &instructions_5, PRIORITY_LOW, DEFAULT_SPEED, 4);
     init_vehicle(&(vehicles[5]), &(intersections[0]), &instructions_6, PRIORITY_LOW, DEFAULT_SPEED, 5);
-    init_vehicle(&(vehicles[6]), &(intersections[1]), &instructions_7, PRIORITY_LOW, DEFAULT_SPEED, 6);
+    init_vehicle(&(vehicles[6]), &(intersections[3]), &instructions_7, PRIORITY_LOW, DEFAULT_SPEED, 6);
     init_vehicle(&(vehicles[7]), &(intersections[4]), &instructions_8, PRIORITY_LOW, DEFAULT_SPEED, 7);
     init_vehicle(&(vehicles[8]), &(intersections[1]), &instructions_9, PRIORITY_LOW, DEFAULT_SPEED, 8);
-    init_vehicle(&(vehicles[9]), &(intersections[3]), &instructions_10, PRIORITY_LOW, DEFAULT_SPEED, 9);
+    init_vehicle(&(vehicles[9]), &(intersections[5]), &instructions_10, PRIORITY_LOW, DEFAULT_SPEED, 9);
+    init_vehicle(&(vehicles[10]), &(intersections[6]), &instructions_11, PRIORITY_LOW, DEFAULT_SPEED, 10);
+    init_vehicle(&(vehicles[11]), &(intersections[1]), &instructions_12, PRIORITY_LOW, DEFAULT_SPEED, 11);
+    init_vehicle(&(vehicles[12]), &(intersections[6]), &instructions_13, PRIORITY_LOW, DEFAULT_SPEED, 12);
+    init_vehicle(&(vehicles[13]), &(intersections[0]), &instructions_14, PRIORITY_LOW, DEFAULT_SPEED, 13);
 
     /* 
     Initially all vehicles are in the active state, put them all in. 
