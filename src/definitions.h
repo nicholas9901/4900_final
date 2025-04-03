@@ -88,12 +88,19 @@ typedef struct {
     char next;    /* Index of the next instruction */
 } instructions_T;
 
+/* Struct for measuring average queue times */
+typedef struct {
+    float total;
+    int num; /* Number of times in queue */
+} queue_time_T;
+
 /* Vehicle */
 typedef struct vehicle {
     vector_T location;
     intersection_T* intersection;
     instructions_T instructions;
     vehicle_priority_T priority;
+    queue_time_T queue_time;
     bool turning;
     bool stopping;
     int speed;

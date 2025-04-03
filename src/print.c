@@ -67,3 +67,22 @@ void print_intersection(intersection_T* intersection)
         printf("\n");
     }
 }
+
+
+/*
+Print Average Queue Times
+    Prints the average queue times of each intersection measured in the number
+    of simulation ticks.
+*/
+void print_avg_queue_times(vehicle_T* vehicles, vehicle_T* emergency_vehicle)
+{
+    for (int i = 0; i < NUM_VEHICLES_TRAFFIC; i++) {
+        printf(
+            "Average queue time for vehicle [%d]: %f\n",
+            vehicles[i].id,
+            vehicles[i].queue_time.total / vehicles[i].queue_time.num);
+    }
+    printf(
+        "Average queue time for the emergency vehicle: %f",
+        emergency_vehicle->queue_time.total / emergency_vehicle->queue_time.num);
+}

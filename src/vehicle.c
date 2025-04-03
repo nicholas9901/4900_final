@@ -45,7 +45,9 @@ void init_vehicle(
         default:
             direction_error(corresponding_direction);
     }
-    
+
+    vehicle->queue_time.num   = 0;
+    vehicle->queue_time.total = 0;    
     vehicle->intersection = intersection;
     vehicle->instructions = *instructions;
     vehicle->priority     = priority;
@@ -88,6 +90,7 @@ void enqueue_vehicle(
     direction_T current_direction = current_vehicle->instructions.list[current_vehicle->instructions.current]; 
     vehicle_list_T* current_list = &(current_vehicle->intersection->queued_vehicles[current_direction]);
     active_vehicles->num--;
+    current_vehicle->queue_time.num++; /* Update the queue number counter */
     for (int i = index; i < active_vehicles->num; i++) {
         active_vehicles->vehicles[i] = active_vehicles->vehicles[i + 1];
     }

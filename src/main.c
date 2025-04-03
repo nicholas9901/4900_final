@@ -21,6 +21,7 @@ int main(int argc, char** argv) {
     vehicle_list_T active_vehicles;
     direction_T    list_instructions[NUM_INST_1];
     vector_T       dispatch_point;
+    int            ticks = 0; /* Used to determine response time */
 
     list_instructions[0] = EAST;
     list_instructions[1] = EAST;
@@ -103,21 +104,23 @@ int main(int argc, char** argv) {
         }
 
         for (int i = 0; i < NUM_INTERSECTIONS; i++) {
-            // if (tlc_baseline(&active_vehicles, &(intersections[i]))) {
-            // }
-            if (tlc_emergency(&active_vehicles, &emergency_vehicle, &(intersections[i]))) {
-            }
+            #if GUI
+            record_queue_times(&(intersections[i]));
+            #endif
+            // if (tlc_baseline(&active_vehicles, &(intersections[i]))) {}
+            if (tlc_emergency(&active_vehicles, &emergency_vehicle, &(intersections[i]))) {}
         }
         #if GUI
         poll_for_exit(); /* Listen for an exit event before updating */
         update_gui(vehicles, &emergency_vehicle, intersections);
         #endif
+        ticks++;
         usleep(SLEEP_INTERVAL);
     }
-    printf("success\n");
+    printf("Emergency vehicle arrived in %d ticks\n", ticks);
 
     #if GUI
-
+    print_avg_queue_times(vehicles, &emergency_vehicle);
     while(1) {
         poll_for_exit();
     }

@@ -168,6 +168,18 @@ void dequeue_vehicles(
 }
 
 /*
+Record Queue Times
+    Increments the queue time counter of each vehicle currently in queue.
+*/
+void record_queue_times(intersection_T* intersection) {
+    for (int i = 0; i < MAX_CONNECTIONS; i++) {
+        for (int j = 0; j < intersection->queued_vehicles[i].num; j++) {
+            intersection->queued_vehicles[i].vehicles[j]->queue_time.total++;
+        }
+    }
+}
+
+/*
 Total In Queue
     Helper function for the TLC algorithms.
     Return the total number of vehicles in the directional queues of an 
@@ -179,28 +191,6 @@ int total_in_queue(intersection_T* intersection) {
         sum += intersection->queued_vehicles[i].num;
     }
     return sum;
-}
-
-/*
-Total Horizontal
-    Helper function for the TLC algorithms.
-    Returns the number of vehicles in the east and west queues.
-*/
-int total_horizontal(intersection_T* intersection)
-{
-    return intersection->queued_vehicles[EAST].num + 
-        intersection->queued_vehicles[WEST].num;
-}
-
-/*
-Total Vertical
-    Helper function for the TLC algorithms.
-    Returns the number of vehicles in the north and south queues.
-*/
-int total_vertical(intersection_T* intersection)
-{
-    return intersection->queued_vehicles[NORTH].num + 
-        intersection->queued_vehicles[SOUTH].num;
 }
 
 /*
@@ -246,7 +236,10 @@ Boukereche, from
 bool tlc_baseline(vehicle_list_T* active_vehicles, intersection_T* intersection)
 {
     /* Do nothing if there is no traffic */
-    if (total_in_queue(intersection) <= 0 ) { return false; }
+    if (total_in_queue(intersection) <= 0 ) { 
+        intersection->timer = 0;
+        return false; 
+    }
 
     if (intersection->timer <= 0) {
         int cycles = NUM_PHASES;
@@ -282,25 +275,31 @@ bool tlc_emergency(
     intersection_T* intersection)
 {
     /* Do nothing if there is no traffic */
-    if (total_in_queue(intersection) <= 0 ) { return false; }
-
-    /* Immediately service the emergency vehicle if the priority flag has been set */
-    if (intersection->priority_service == true) {
-        intersection->phase = get_phase(
-            emergency_vehicle->instructions.list[emergency_vehicle->instructions.current],
-            emergency_vehicle->instructions.list[emergency_vehicle->instructions.next]);
-        
-        intersection->timer = INTERSECTION_SIZE / emergency_vehicle->speed;
-        intersection->priority_service = false;
-        dequeue_vehicles(active_vehicles, intersection);
-        #if GUI
-        draw_phase_change(intersection);    
-        #endif
-        return true;
+    if (total_in_queue(intersection) <= 0 ) { 
+        intersection->timer = 0;
+        return false; 
     }
 
     if (intersection->timer <= 0) {
         int cycles = NUM_PHASES;
+        /* 
+        Before servicing the emergency vehicle, the timer for the previous
+        cars has to run out to avoid collisions. Then, the algorith checks if 
+        the priority flag has been set by the emergency vehicle.
+        */
+        if (intersection->priority_service == true) {
+            intersection->phase = get_phase(
+                emergency_vehicle->instructions.list[emergency_vehicle->instructions.current],
+                emergency_vehicle->instructions.list[emergency_vehicle->instructions.next]);
+            
+            intersection->timer = INTERSECTION_SIZE / emergency_vehicle->speed;
+            intersection->priority_service = false;
+            dequeue_vehicles(active_vehicles, intersection);
+            #if GUI
+            draw_phase_change(intersection);    
+            #endif
+            return true;
+        }
         while (intersection->timer <= 0) {
             intersection->phase = (intersection->phase + 1) % NUM_PHASES;
             intersection->timer = max_flow(intersection) * TIME_TO_CROSS;
@@ -314,7 +313,8 @@ bool tlc_emergency(
         return true;
     }
     intersection->timer--;
-    return false;}
+    return false;
+}
 
 /*
 Phase Timer
