@@ -199,7 +199,7 @@ void init_draw_intersection(intersection_T* intersection)
     };
     SDL_FillRect(win_surface, &east, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    intersection_icons[intersection->id].divs[EAST].w = east.w;
+    intersection_icons[intersection->id].divs[EAST].w = east.w - DIV_WIDTH;
     intersection_icons[intersection->id].divs[EAST].h = DIV_WIDTH;
     intersection_icons[intersection->id].divs[EAST].x = east.x + DIV_WIDTH;
     intersection_icons[intersection->id].divs[EAST].y = east.y + DIV_OFFSET;
@@ -215,7 +215,7 @@ void init_draw_intersection(intersection_T* intersection)
     SDL_FillRect(win_surface, &south, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
     intersection_icons[intersection->id].divs[SOUTH].w = DIV_WIDTH;
-    intersection_icons[intersection->id].divs[SOUTH].h = south.h;
+    intersection_icons[intersection->id].divs[SOUTH].h = south.h - DIV_WIDTH;
     intersection_icons[intersection->id].divs[SOUTH].x = south.x + DIV_OFFSET;
     intersection_icons[intersection->id].divs[SOUTH].y = south.y + DIV_WIDTH; 
     SDL_FillRect(win_surface, &(intersection_icons[intersection->id].divs[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_YELLOW));
