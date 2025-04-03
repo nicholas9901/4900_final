@@ -14,3 +14,4 @@ sudo apt-get install libpng-dev
 ```
 ### Resources
 - car.png: Icon made by Ylivdesign from https://www.flaticon.com/free-icon/car_12689302 
+- ambulance.png: Icon made by gstudiomagen from https://www.vecteezy.com/vector-art/2726089-ambulance-paramedic-top-view-vector-design

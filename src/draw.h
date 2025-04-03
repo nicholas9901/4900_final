@@ -21,6 +21,7 @@
 #define PATH_BASE   "4900_final"
 #define PATH_ASSETS "assets"
 #define PATH_IMG_CAR PATH_ASSETS"/car.png"
+#define PATH_IMG_AMBULANCE PATH_ASSETS"/ambulance.png"
 
 extern char run_path[PATH_SIZE];
 
@@ -33,10 +34,11 @@ typedef struct {
     SDL_Rect 
         divs[MAX_CONNECTIONS],
         stops[MAX_CONNECTIONS];
+    Uint32 stop_colors[MAX_CONNECTIONS];
 } intersection_SDL_T;
 
-void init_gui(vehicle_T*, vehicle_T*, intersection_T*);
-void update_gui(vehicle_T*, vehicle_T*, intersection_T*);
+void init_gui(vehicle_T*, vehicle_T*, intersection_T*, vector_T*);
+void update_gui(vehicle_T*, vehicle_T*, intersection_T*, vector_T*);
 void exit_gui();
 void init_draw_vehicle(vehicle_T*);
 void init_draw_emergency_vehicle(vehicle_T*);

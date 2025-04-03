@@ -5,12 +5,15 @@ SDL_Surface* win_surface;
 SDL_Renderer* renderer; //apply transformations to images
 SDL_Event event;
 SDL_Texture* car_texture;
+SDL_Texture* ambulance_texture;
 vehicle_SDL_T vehicle_icons[NUM_VEHICLES_TRAFFIC];
 vehicle_SDL_T emergency_vehicle_icon;
 intersection_SDL_T intersection_icons[NUM_INTERSECTIONS];
+SDL_Rect dispatch_point_icon;
 
 char run_path[PATH_SIZE];
 char path_assets_car[PATH_SIZE];
+char path_assets_ambulance[PATH_SIZE];
 
 /* 
 init_gui: 
@@ -19,7 +22,8 @@ init_gui:
 void init_gui(
     vehicle_T* vehicles, 
     vehicle_T* emergency_vehicle, 
-    intersection_T* intersections)
+    intersection_T* intersections,
+    vector_T* dispatch_point)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
     IMG_Init(IMG_INIT_PNG);
@@ -66,6 +70,12 @@ void init_gui(
         init_draw_vehicle(&(vehicles[i]));
     }
 
+    /* Initialize the dispatch point */
+    dispatch_point_icon.x = dispatch_point->x;
+    dispatch_point_icon.y = dispatch_point->y;
+    dispatch_point_icon.w = VEHICLE_SIZE;
+    dispatch_point_icon.h = VEHICLE_SIZE;
+
     SDL_UpdateWindowSurface(win);
 }
 
@@ -76,23 +86,51 @@ update_gui:
 void update_gui(
     vehicle_T* vehicles, 
     vehicle_T* emergency_vehicle,
-    intersection_T* intersections)
+    intersection_T* intersections,
+    vector_T* dispatch_point)
 {
+    static const double rotation_vector[4] = {0.0, 90.0, 180.0, 270.0};
+
+    SDL_SetRenderDrawColor(renderer, COLOR_GREEN, 1);
+    SDL_RenderFillRect(renderer, &(dispatch_point_icon));
+
+    SDL_SetRenderDrawColor(renderer, COLOR_BLACK, 1);
     SDL_RenderFillRect(renderer, &(emergency_vehicle_icon.pos));
     emergency_vehicle_icon.pos.x = emergency_vehicle->location.x;
     emergency_vehicle_icon.pos.y = emergency_vehicle->location.y;
-    SDL_RenderCopyEx(renderer, emergency_vehicle_icon.texture, NULL, &(emergency_vehicle_icon.pos), 0.0, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(
+        renderer, 
+        emergency_vehicle_icon.texture, 
+        NULL, 
+        &(emergency_vehicle_icon.pos), 
+        rotation_vector[emergency_vehicle->instructions.list[emergency_vehicle->instructions.current]], 
+        NULL, 
+        SDL_FLIP_NONE);
 
     for (int i = 0; i < NUM_VEHICLES_TRAFFIC; i++) {
         SDL_RenderFillRect(renderer, &(vehicle_icons[i].pos));
         vehicle_icons[i].pos.x = vehicles[i].location.x;
         vehicle_icons[i].pos.y = vehicles[i].location.y;
-        SDL_RenderCopyEx(renderer, vehicle_icons[i].texture, NULL, &(vehicle_icons[i].pos), 0.0, NULL, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(
+            renderer, 
+            vehicle_icons[i].texture, 
+            NULL, 
+            &(vehicle_icons[i].pos), 
+            rotation_vector[vehicles[i].instructions.list[vehicles[i].instructions.current]], 
+            NULL, 
+            SDL_FLIP_NONE);
     }
 
-    // for (int i = 0; i < NUM_INTERSECTIONS; i++) {
-    //     intersection_icons
-    // }
+    SDL_SetRenderDrawColor(renderer, COLOR_YELLOW, 1);
+    for (int i = 0; i < NUM_INTERSECTIONS; i++) {
+        SDL_RenderFillRects(renderer, intersection_icons[i].divs, NUM_DIRECTIONS);
+        for (int j = 0; j < MAX_CONNECTIONS; j++) {
+            SDL_FillRect(
+                win_surface, 
+                &(intersection_icons[i].stops[j]),
+                intersection_icons[i].stop_colors[j]);    
+        }
+    }
 
     SDL_RenderPresent(renderer);
 }
@@ -115,7 +153,7 @@ void init_draw_vehicle(vehicle_T* vehicle)
 
 void init_draw_emergency_vehicle(vehicle_T* vehicle)
 {
-    emergency_vehicle_icon.texture = car_texture;
+    emergency_vehicle_icon.texture = ambulance_texture;
     emergency_vehicle_icon.pos.w   = VEHICLE_SIZE;
     emergency_vehicle_icon.pos.h   = VEHICLE_SIZE;
     emergency_vehicle_icon.pos.x   = vehicle->location.x;
@@ -147,7 +185,7 @@ void init_draw_intersection(intersection_T* intersection)
     SDL_FillRect(win_surface, &north, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
     intersection_icons[intersection->id].divs[NORTH].w = DIV_WIDTH;
-    intersection_icons[intersection->id].divs[NORTH].h = north.h;
+    intersection_icons[intersection->id].divs[NORTH].h = north.h - DIV_WIDTH;
     intersection_icons[intersection->id].divs[NORTH].x = north.x + DIV_OFFSET;
     intersection_icons[intersection->id].divs[NORTH].y = north.y;
     SDL_FillRect(win_surface, &(intersection_icons[intersection->id].divs[NORTH]), SDL_MapRGB(win_surface->format, COLOR_YELLOW));
@@ -161,9 +199,9 @@ void init_draw_intersection(intersection_T* intersection)
     };
     SDL_FillRect(win_surface, &east, SDL_MapRGB(win_surface->format, COLOR_BLACK));
 
-    intersection_icons[intersection->id].divs[EAST].w = east.h;
+    intersection_icons[intersection->id].divs[EAST].w = east.w;
     intersection_icons[intersection->id].divs[EAST].h = DIV_WIDTH;
-    intersection_icons[intersection->id].divs[EAST].x = east.x;
+    intersection_icons[intersection->id].divs[EAST].x = east.x + DIV_WIDTH;
     intersection_icons[intersection->id].divs[EAST].y = east.y + DIV_OFFSET;
     SDL_FillRect(win_surface, &(intersection_icons[intersection->id].divs[EAST]), SDL_MapRGB(win_surface->format, COLOR_YELLOW));
     
@@ -179,7 +217,7 @@ void init_draw_intersection(intersection_T* intersection)
     intersection_icons[intersection->id].divs[SOUTH].w = DIV_WIDTH;
     intersection_icons[intersection->id].divs[SOUTH].h = south.h;
     intersection_icons[intersection->id].divs[SOUTH].x = south.x + DIV_OFFSET;
-    intersection_icons[intersection->id].divs[SOUTH].y = south.y;
+    intersection_icons[intersection->id].divs[SOUTH].y = south.y + DIV_WIDTH; 
     SDL_FillRect(win_surface, &(intersection_icons[intersection->id].divs[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_YELLOW));
 
     //west
@@ -191,7 +229,7 @@ void init_draw_intersection(intersection_T* intersection)
     };
     SDL_FillRect(win_surface, &west, SDL_MapRGB(win_surface->format, COLOR_BLACK));
     
-    intersection_icons[intersection->id].divs[WEST].w = west.h;
+    intersection_icons[intersection->id].divs[WEST].w = west.w - DIV_WIDTH;
     intersection_icons[intersection->id].divs[WEST].h = DIV_WIDTH;
     intersection_icons[intersection->id].divs[WEST].x = west.x;
     intersection_icons[intersection->id].divs[WEST].y = west.y + DIV_OFFSET;
@@ -233,28 +271,28 @@ void draw_phase_change(intersection_T* intersection)
 {
     switch (intersection->phase) {
         case VERTICAL_L:
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_BLUE));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_RED));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_BLUE));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            intersection_icons[intersection->id].stop_colors[NORTH] = SDL_MapRGB(win_surface->format, COLOR_BLUE);
+            intersection_icons[intersection->id].stop_colors[EAST]  = SDL_MapRGB(win_surface->format, COLOR_RED);
+            intersection_icons[intersection->id].stop_colors[SOUTH] = SDL_MapRGB(win_surface->format, COLOR_BLUE);
+            intersection_icons[intersection->id].stop_colors[WEST]  = SDL_MapRGB(win_surface->format, COLOR_RED);
             break;
         case VERTICAL_SR:
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_RED));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_RED));
+            intersection_icons[intersection->id].stop_colors[NORTH] = SDL_MapRGB(win_surface->format, COLOR_GREEN);
+            intersection_icons[intersection->id].stop_colors[EAST]  = SDL_MapRGB(win_surface->format, COLOR_RED);
+            intersection_icons[intersection->id].stop_colors[SOUTH] = SDL_MapRGB(win_surface->format, COLOR_GREEN);
+            intersection_icons[intersection->id].stop_colors[WEST]  = SDL_MapRGB(win_surface->format, COLOR_RED);
             break;
         case HORIZONTAL_L:
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_RED));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_BLUE));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_RED));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_BLUE));
+            intersection_icons[intersection->id].stop_colors[NORTH] = SDL_MapRGB(win_surface->format, COLOR_RED);
+            intersection_icons[intersection->id].stop_colors[EAST]  = SDL_MapRGB(win_surface->format, COLOR_BLUE);
+            intersection_icons[intersection->id].stop_colors[SOUTH] = SDL_MapRGB(win_surface->format, COLOR_RED);
+            intersection_icons[intersection->id].stop_colors[WEST]  = SDL_MapRGB(win_surface->format, COLOR_BLUE);
             break;
         case HORIZONTAL_SR:
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[NORTH]), SDL_MapRGB(win_surface->format, COLOR_RED));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[EAST]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[SOUTH]), SDL_MapRGB(win_surface->format, COLOR_RED));
-            SDL_FillRect(win_surface, &(intersection_icons[intersection->id].stops[WEST]), SDL_MapRGB(win_surface->format, COLOR_GREEN));
+            intersection_icons[intersection->id].stop_colors[NORTH] = SDL_MapRGB(win_surface->format, COLOR_RED);
+            intersection_icons[intersection->id].stop_colors[EAST]  = SDL_MapRGB(win_surface->format, COLOR_GREEN);
+            intersection_icons[intersection->id].stop_colors[SOUTH] = SDL_MapRGB(win_surface->format, COLOR_RED);
+            intersection_icons[intersection->id].stop_colors[WEST]  = SDL_MapRGB(win_surface->format, COLOR_GREEN);
             break;
     }
 }
@@ -273,10 +311,18 @@ void initialize_assets()
     /* Car */
     strcpy(path_assets_car, run_path);
     strcat(path_assets_car, PATH_IMG_CAR);
-
     car_texture = IMG_LoadTexture(renderer, path_assets_car);
+    
+    /* Ambulance */
+    strcpy(path_assets_ambulance, run_path);
+    strcat(path_assets_ambulance, PATH_IMG_AMBULANCE);
+    ambulance_texture = IMG_LoadTexture(renderer, path_assets_ambulance);
 
     if (!car_texture) {
+        printf("Failed to load vehicle icon (%s), %s\n", path_assets_car, SDL_GetError());
+    }
+
+    if (!ambulance_texture) {
         printf("Failed to load vehicle icon (%s), %s\n", path_assets_car, SDL_GetError());
     }
 }

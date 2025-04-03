@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     instructions_T instructions_1;
     init_instructions(&instructions_1, list_instructions, NUM_INST_1);
     
-    int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_LENGTH};
+    int road_lengths_1[MAX_CONNECTIONS] = {DEFAULT_LENGTH+30, DEFAULT_LENGTH+30, DEFAULT_LENGTH, DEFAULT_LENGTH};
 
     /* Initialize the intersections */
     init_intersection(&(intersections[0]), road_lengths_1, 0);
@@ -88,13 +88,13 @@ int main(int argc, char** argv) {
     init_active_vehicles(&active_vehicles, &emergency_vehicle, vehicles);
 
     #if GUI
-    init_gui(vehicles, &emergency_vehicle, intersections);
+    init_gui(vehicles, &emergency_vehicle, intersections, &dispatch_point);
     #endif
     
     clock_gettime(CLOCK_MONOTONIC, &next_wakeup);
 
     /* Main program loop */
-    while(!emergency_arrived(&dispatch_point, &emergency_vehicle)) {
+    while(1){//!emergency_arrived(&dispatch_point, &emergency_vehicle)) {
 
         clock_gettime(CLOCK_MONOTONIC, &start_time); /* Record start time */
 
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
         }
         #if GUI
         poll_for_exit(); /* Listen for an exit event before updating */
-        update_gui(vehicles, &emergency_vehicle, intersections);
+        update_gui(vehicles, &emergency_vehicle, intersections, &dispatch_point);
         #endif
 
         clock_gettime(CLOCK_MONOTONIC, &end_time); /* Record end time */
