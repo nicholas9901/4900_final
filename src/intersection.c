@@ -250,7 +250,9 @@ bool tlc_baseline(vehicle_list_T* active_vehicles, intersection_T* intersection)
             if (cycles <= 0) { return false; }
         }
         dequeue_vehicles(active_vehicles, intersection);
+        #if GUI
         draw_phase_change(intersection);    
+        #endif
         return true;
     }
     intersection->timer--;

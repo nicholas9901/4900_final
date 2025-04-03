@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> /* only needed for exit() could be optimized out */
 #include <stdbool.h>
-#include <unistd.h>
+#include <time.h>
 
 /* Struct constants */
 #define NUM_INTERSECTIONS    5
@@ -34,7 +34,9 @@
 #define INIT_INTERSECTION_START_Y ((MAX_Y / 2) - INTERSECTION_SIZE)
 #define SUCCESS_DISTANCE_THRESHOLD 100 /* In squared distance */
 
-#define SLEEP_INTERVAL 20000
+/* Time constants */
+#define NANOSECOND     1000000000
+#define SLEEP_INTERVAL 20000000
 
 /* External variables */
 static const int direction_matrix[4][2] = {
@@ -88,11 +90,11 @@ typedef struct {
     char next;    /* Index of the next instruction */
 } instructions_T;
 
-/* Struct for measuring average queue times */
+/* Struct for measuring average times */
 typedef struct {
-    float total;
-    int num; /* Number of times in queue */
-} queue_time_T;
+    double total;
+    int num;
+} avg_time_T;
 
 /* Vehicle */
 typedef struct vehicle {
@@ -100,7 +102,7 @@ typedef struct vehicle {
     intersection_T* intersection;
     instructions_T instructions;
     vehicle_priority_T priority;
-    queue_time_T queue_time;
+    avg_time_T queue_time;
     bool turning;
     bool stopping;
     int speed;

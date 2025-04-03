@@ -83,6 +83,6 @@ void print_avg_queue_times(vehicle_T* vehicles, vehicle_T* emergency_vehicle)
             vehicles[i].queue_time.total / vehicles[i].queue_time.num);
     }
     printf(
-        "Average queue time for the emergency vehicle: %f",
+        "Average queue time for the emergency vehicle: %f\n",
         emergency_vehicle->queue_time.total / emergency_vehicle->queue_time.num);
 }
