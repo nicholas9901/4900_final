@@ -5,7 +5,7 @@
 
 /* Struct constants */
 #define NUM_INTERSECTIONS    5
-#define NUM_VEHICLES_TRAFFIC 1
+#define NUM_VEHICLES_TRAFFIC 10
 #define NUM_VEHICLES_TOTAL   (NUM_VEHICLES_TRAFFIC + 1)
 #define NUM_DIRECTIONS       4
 
